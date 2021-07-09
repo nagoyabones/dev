@@ -15,6 +15,18 @@ class TestFileOperator(unittest.TestCase, FileOperator):
         init_dir = os.path.abspath(os.path.dirname(__file__))
         self.files_select(init_dir, "test_file_select")
 
+    def test_files_rename(self):
+        init_dir = os.path.abspath(os.path.dirname(__file__))
+        file_paths = self.files_select(init_dir, "ファイルを選択")
+        for file in file_paths:
+            self.files_rename(file, "hogehoge")
+
+    def test_files_duplicate(self):
+        init_dir = os.path.abspath(os.path.dirname(__file__))
+        file_paths = self.files_select(init_dir, "ファイルを選択")
+        for file in file_paths:
+            print(self.files_duplicate(file))
+
 
 class TestDirectoryOperator(unittest.TestCase, DirectoryOperator):
     def test_directory_select(self):

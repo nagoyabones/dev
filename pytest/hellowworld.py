@@ -1,5 +1,6 @@
 import shutil
 import os
+import re
 import tkinter
 from tkinter import filedialog
 from tkinter import messagebox
@@ -27,6 +28,20 @@ class DirectoryOperator:
         ret = messagebox.askyesno("確認", "フォルダを削除しますか？")
         if ret:
             shutil.rmtree(target_path)
+
+    def directory_move(self, move_dic_paths, to_dir_path):
+        for file_path in move_dic_paths:
+            if os.path.exists(file_path) and os.path.exists(to_dir_path):
+                shutil.move(file_path, to_dir_path)
+            else:
+                print("no exists")
+
+    def directory_copy(self, copy_dic_paths, to_dir_path):
+        for file_path in copy_dic_paths:
+            if os.path.exists(file_path) and os.path.exists(to_dir_path):
+                shutil.copy(file_path, to_dir_path)
+            else:
+                print("no exists")
 
 
 class FileOperator:
@@ -59,13 +74,44 @@ class FileOperator:
             else:
                 print("no exists")
 
+    def files_copy(self, copy_file_paths, to_dir_path):
+        for file_path in copy_file_paths:
+            if os.path.exists(file_path) and os.path.exists(to_dir_path):
+                shutil.copy(file_path, to_dir_path)
+            else:
+                print("no exists")
+
+    def files_rename(self, base_file_path, rename_file_name):
+        file_name, ext = os.path.splitext(os.path.basename(base_file_path))
+
+        rename_file_path = base_file_path.replace(
+            file_name + ext, rename_file_name + ext
+        )
+        use_file_path = self.files_duplicate(rename_file_path)
+        os.rename(base_file_path, use_file_path)
+
+    def files_duplicate(self, file_path, count=1):
+
+        if os.path.exists(file_path):
+
+            file_name, ext = os.path.splitext(os.path.basename(file_path))
+            tail_num_split_file_name = re.sub(r"\(\d+\)$", "", file_name)
+
+            tail = "(" + str(count) + ")"
+
+            rename_file_path = file_path.replace(
+                file_name + ext, tail_num_split_file_name + tail + ext
+            )
+
+            return self.files_duplicate(rename_file_path, count + 1)
+
+        else:
+            return file_path
+
 
 if __name__ == "__main__":
     init_dir = os.path.abspath(os.path.dirname(__file__))
     f = FileOperator()
     d = DirectoryOperator()
 
-    move_file_paths = f.files_select(init_dir, "移動するファイルを選択")
-    to_dic_path = d.directory_select(init_dir, "ファイルの移動先を選択")
-
-    f.file_move(move_file_paths, to_dic_path)
+    file_paths = f.files_select(init_dir, "リネームするファイルを選択")
