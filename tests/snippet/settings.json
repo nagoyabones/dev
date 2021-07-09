@@ -1,0 +1,197 @@
+{
+  // environment
+  "python.pythonPath": "C:\\Users\\bon_x0028.MAIN001\\Anaconda3\\envs\\py38\\python.exe",
+  // spell
+  "cSpell.words": [
+      "acell",
+      "af",
+      "af inet",
+      "asdict",
+      "cglo",
+      "ctypes",
+      "datefmt",
+      "dlvp",
+      "ffprobe",
+      "gspread",
+      "icacls",
+      "inet",
+      "ismethod",
+      "itertools",
+      "meiryo",
+      "milli",
+      "mrkdwn",
+      "nuitka",
+      "pformat",
+      "popen",
+      "previsualization",
+      "pwfp",
+      "pydrive",
+      "pyperclip",
+      "pyqt",
+      "pywin",
+      "qdarkstyle",
+      "qthread",
+      "qtpy",
+      "robocopy",
+      "rtkp",
+      "satuei",
+      "startf",
+      "startf useshowwindow",
+      "strptime",
+      "tmpf",
+      "tmpp",
+      "useshowwindow",
+      "windll",
+      "zfill"
+  ],
+  // test
+  "python.testing.unittestArgs": [
+      "-v",
+      "-s",
+      "./tests",
+      "-p",
+      "test_*.py"
+  ],
+  "python.testing.autoTestDiscoverOnSaveEnabled": false,
+  "python.testing.pytestEnabled": false,
+  "python.testing.nosetestsEnabled": false,
+  "python.testing.unittestEnabled": true,
+  // git lens
+  "gitlens.codeLens.recentChange.enabled": false,
+  "gitlens.codeLens.authors.enabled": false,
+  "gitlens.currentLine.enabled": false,
+  // linter
+  "editor.rulers": [
+      89
+  ],
+  "python.linting.enabled": true,
+  "python.linting.pylintEnabled": false,
+  "python.linting.lintOnSave": true,
+  "editor.formatOnSave": true,
+  "editor.formatOnPaste": false,
+  "python.formatting.provider": "black",
+  "python.linting.flake8Enabled": true,
+  "python.linting.flake8Args": [
+      "--max-line-length",
+      "88",
+      "--ignore=E203,W503,W504",
+  ],
+  "editor.tokenColorCustomizations": {
+    "textMateRules": [
+      {
+        "scope": ["punctuation.separator.array.json.comments","punctuation.separator.dictionary.pair.json.comments","variable.other.object.js","meta.objectliteral.js"],
+        "settings": {
+          "foreground": "#dbdbdb"
+        }
+      },
+      {
+        "scope": ["punctuation.definition.decorator.python"],
+        "settings": {
+          "foreground": "#d47e8d"
+        }
+      },
+      {
+        "scope": ["entity.name.function.python","entity.name.function"],
+        "settings": {
+          "foreground": "#e0944d"
+        }
+      },
+      {
+        "scope": "support.function.magic.python",
+        "settings": {
+          "foreground": "#db6985"
+        }
+      },
+      {
+        "scope": ["constant.other.caps.python","variable.other.constant.js"],
+        "settings": {
+          "foreground": "#e08ba0"
+        }
+      },
+      {
+        "scope": ["meta.object-literal.key.js"],
+        "settings": {
+          "foreground": "#e292a6"
+        }
+      },
+      {
+        "scope": ["variable.parameter.function.language.python","meta.function-call.arguments.python","variable.parameter.js"],
+        "settings": {
+          "foreground": "#60a8be"
+        }
+      },
+      {
+        "scope": ["meta.attribute.python","variable.other.object.property.js","variable.other.property.js"],
+        "settings": {
+          "foreground": "#688b8d"
+        }
+      },
+      {
+        "scope": ["support.class.js"],
+        "settings": {
+          "foreground": "#2ed8b3"
+        }
+      },
+      {
+        "scope": ["support.type.python","support.type.js"],
+        "settings": {
+          "foreground": "#21c3c9"
+        }
+      },
+      {
+        "scope": ["meta.item-access.python"],
+        "settings": {
+          "foreground": "#989bc2"
+        }
+      },
+      {
+        "scope": ["support.variable.magic.python"],
+        "settings": {
+          "foreground": "#766fd8"
+        }
+      },
+      {
+        "scope": ["support.variable.property.js"],
+        "settings": {
+          "foreground": "#766fd8",
+          "fontStyle": "italic"
+        }
+      },
+      {
+        "scope": ["support.type.property-name"],
+        "settings": {
+          "foreground": "#7ac1eb"
+        }
+      },
+      {
+        "scope": ["support.function.builtin.python"],
+        "settings": {
+          "foreground": "#cf4f8b"
+        }
+      },
+      {
+        "scope": ["string.quoted.single.python","string.quoted.single.js","string.quoted.double.json"],
+        "settings": {
+          "foreground": "#93b887"
+        }
+      },
+      {
+        "scope": ["constant.numeric.dec.python","constant.numeric.float.python","constant.numeric.decimal.js"],
+        "settings": {
+          "foreground": "#92dfa9"
+        }
+      },
+      {
+        "scope": ["string.quoted.docstring.multi.python","comment.line.double-slash.js","punctuation.definition.comment.yaml","comment.line.number-sign.yaml"],
+        "settings": {
+          "foreground": "#4d664d"
+        }
+      },
+    ]
+  },
+    "workbench.editorAssociations": {
+        "*.ipynb": "jupyter.notebook.ipynb"
+    },
+    "editor.fontLigatures": null,
+    "terminal.integrated.defaultProfile.windows": "Command Prompt"
+}
