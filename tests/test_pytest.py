@@ -82,11 +82,11 @@ class TestFileOperator(unittest.TestCase, FileOperator):
         for file in file_paths:
             self.file_rename(file, "hogehoge")
 
-    def test_file_duplicate(self):
+    def test_file_duplicate_check(self):
         file_paths = self.files_select("ファイルを選択")
 
         for file in file_paths:
-            print(self.file_duplicate(file))
+            print(self.file_duplicate_check(file))
 
 
 if __name__ == "__main__":
