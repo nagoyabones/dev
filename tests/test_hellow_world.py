@@ -1,5 +1,6 @@
 import unittest
-from tkinter import messagebox
+import os
+from unittest import mock
 import tkinter
 
 from hellow_world import FileOperator
@@ -7,12 +8,22 @@ from hellow_world import DirectoryOperator
 
 
 class TestDirectoryOperator(unittest.TestCase, DirectoryOperator):
+    def test__current_directory(self):
+        self.assertEqual(
+            os.path.join(os.path.expanduser("~"), "dev", "pytest"),
+            self._current_directory,
+        )
+
     def test__set_tkinter(self):
         self.assertFalse(hasattr(self, "_window"))
+        self.assertFalse(hasattr(self, "tkinter"))
         self._set_tkinter()
         self.assertIsInstance(self._window, tkinter.Tk)
+        self.assertIs(self.tkinter, tkinter)
 
+    """
     def test_directory_select(self):
+        self.tkinter = mock.MagicMock()
         path = self.directory_select("test_directory_select")
         print(path)
 
@@ -46,9 +57,11 @@ class TestDirectoryOperator(unittest.TestCase, DirectoryOperator):
     def test_directory_duplicate_check(self):
         dic_path = self.directory_select("ファイルを選択")
         print(self.directory_duplicate_check(dic_path))
+    """
 
 
 class TestFileOperator(unittest.TestCase, FileOperator):
+    """
     def test_files_select(self):
         path = self.files_select("test_file_select")
         print(path)
@@ -93,6 +106,7 @@ class TestFileOperator(unittest.TestCase, FileOperator):
 
         for file in file_paths:
             print(self.file_duplicate_check(file))
+    """
 
 
 if __name__ == "__main__":

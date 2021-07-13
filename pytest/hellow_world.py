@@ -6,20 +6,22 @@ from tkinter import filedialog
 
 
 class DirectoryOperator:
+    @property
+    def _current_directory(self):
+        return os.path.abspath(os.path.dirname(__file__))
+
     def _set_tkinter(self):
         if hasattr(self, "_window") is False:
             self._window = tkinter.Tk()
             self._window.withdraw()
+        if hasattr(self, "tkinter") is False:
+            self.tkinter = tkinter
 
-    def directory_select(
-        self, title_text, init_path=os.path.abspath(os.path.dirname(__file__))
-    ):
-        root = tkinter.Tk()
-        root.withdraw()
-        dir_path = tkinter.filedialog.askdirectory(
-            title=title_text, initialdir=init_path
+    def directory_select(self):
+        self._set_tkinter()
+        return self.tkinter.filedialog.askdirectory(
+            title="please select directory", initialdir=self._current_directory
         )
-        return dir_path
 
     def directory_create(self, create_dir_path, create_dir_name):
         new_dir_path = os.path.join(create_dir_path, create_dir_name)
