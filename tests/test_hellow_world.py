@@ -8,6 +8,9 @@ from hellow_world import DirectoryOperator
 
 
 class TestDirectoryOperator(unittest.TestCase, DirectoryOperator):
+    def setUp(self):
+        self.tkinter = mock.MagicMock()
+
     def test__current_directory(self):
         self.assertEqual(
             os.path.join(os.path.expanduser("~"), "dev", "pytest"),
@@ -15,18 +18,21 @@ class TestDirectoryOperator(unittest.TestCase, DirectoryOperator):
         )
 
     def test__set_tkinter(self):
+        del self.tkinter
         self.assertFalse(hasattr(self, "_window"))
         self.assertFalse(hasattr(self, "tkinter"))
         self._set_tkinter()
         self.assertIsInstance(self._window, tkinter.Tk)
         self.assertIs(self.tkinter, tkinter)
 
-    """
     def test_directory_select(self):
-        self.tkinter = mock.MagicMock()
-        path = self.directory_select("test_directory_select")
-        print(path)
+        def askdirectory(title, initialdir):
+            return initialdir
 
+        self.tkinter.filedialog.askdirectory = askdirectory
+        self.assertEqual(self._current_directory, self.directory_select())
+
+    """
     def test_directory_create(self):
         path = self.directory_select("test_directory_select")
         if path != "":
