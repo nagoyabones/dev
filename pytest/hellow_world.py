@@ -24,9 +24,7 @@ class DirectoryOperator:
         )
 
     def directory_create(self, create_dir_path, create_dir_name):
-        new_dir_path = os.path.join(create_dir_path, create_dir_name)
-        check_ok_path = self.directory_duplicate_check(new_dir_path)
-        os.makedirs(check_ok_path, exist_ok=True)
+        os.makedirs(os.path.join(create_dir_path, create_dir_name), exist_ok=True)
 
     def directory_remove(self, target_path, ret=False):
         if ret:

@@ -32,12 +32,14 @@ class TestDirectoryOperator(unittest.TestCase, DirectoryOperator):
         self.tkinter.filedialog.askdirectory = askdirectory
         self.assertEqual(self._current_directory, self.directory_select())
 
-    """
     def test_directory_create(self):
-        path = self.directory_select("test_directory_select")
-        if path != "":
-            self.directory_create(path, "test")
+        test_path = os.path.join(self._current_directory, "test")
+        self.assertFalse(os.path.exists(test_path))
+        self.directory_create(self._current_directory, "test")
+        self.assertTrue(os.path.exists(test_path))
+        self.directory_remove(test_path)
 
+    """
     def test_directory_remove(self):
         path = self.directory_select("test_directory_select")
         if path != "":
