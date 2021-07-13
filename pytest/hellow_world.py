@@ -6,6 +6,11 @@ from tkinter import filedialog
 
 
 class DirectoryOperator:
+    def _set_tkinter(self):
+        if hasattr(self, "_window") is False:
+            self._window = tkinter.Tk()
+            self._window.withdraw()
+
     def directory_select(
         self, title_text, init_path=os.path.abspath(os.path.dirname(__file__))
     ):

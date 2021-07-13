@@ -1,10 +1,17 @@
 import unittest
 from tkinter import messagebox
+import tkinter
+
 from hellow_world import FileOperator
 from hellow_world import DirectoryOperator
 
 
 class TestDirectoryOperator(unittest.TestCase, DirectoryOperator):
+    def test__set_tkinter(self):
+        self.assertFalse(hasattr(self, "_window"))
+        self._set_tkinter()
+        self.assertIsInstance(self._window, tkinter.Tk)
+
     def test_directory_select(self):
         path = self.directory_select("test_directory_select")
         print(path)
