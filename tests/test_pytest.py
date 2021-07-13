@@ -78,9 +78,8 @@ class TestFileOperator(unittest.TestCase, FileOperator):
 
     def test_file_rename(self):
         file_paths = self.files_select("ファイルを選択")
-
         for file in file_paths:
-            self.file_rename(file, "hogehoge")
+            self.file_rename(file, "test")
 
     def test_file_duplicate_check(self):
         file_paths = self.files_select("ファイルを選択")
