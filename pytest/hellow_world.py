@@ -1,23 +1,53 @@
+import logging
+import tkinter
 import shutil
+import sys
 import os
 import re
-import tkinter
+
 from tkinter import filedialog
 
 
-class OsExists:
+class OsPathAlternative:
     def _is_exists(self, path):
         return os.path.exists(path)
 
     def _is_not_exists(self, path):
         return False if self._is_exists(path) else True
 
+    def _join_path(self, *path):
+        return os.path.join(*path)
 
-class DirectoryOperator(OsExists):
     @property
     def _current_directory(self):
         return os.path.abspath(os.path.dirname(__file__))
 
+
+class Logger:
+    def logger_output(self, level, text):
+        logger = logging.getLogger(__name__)
+        sh = logging.StreamHandler(sys.stdout)
+        fmt = logging.Formatter(
+            "%(asctime)s - %(name)s - %(levelname)s - %(message)s", "%Y-%m-%dT%H:%M:%S"
+        )
+        sh.setFormatter(fmt)
+
+        lev = {
+            "ERROR": logging.ERROR,
+            "WARNING": logging.WARNING,
+            "INFO": logging.INFO,
+            "DEBUG": logging.DEBUG,
+        }.get(level)
+
+        print(lev)
+
+        logger.setLevel(lev)
+        logger.addHandler(sh)
+
+        logger.log(lev, text)
+
+
+class DirectoryOperator(OsPathAlternative):
     def _set_tkinter(self):
         if hasattr(self, "_window") is False:
             self._window = tkinter.Tk()
@@ -32,7 +62,7 @@ class DirectoryOperator(OsExists):
         )
 
     def directory_create(self, create_dir_path, create_dir_name):
-        os.makedirs(os.path.join(create_dir_path, create_dir_name), exist_ok=True)
+        os.makedirs(self._join_path(create_dir_path, create_dir_name), exist_ok=True)
 
     def directory_remove(self, target_path, fail_safe=False):
         if fail_safe:
@@ -40,8 +70,9 @@ class DirectoryOperator(OsExists):
 
     def directory_move(self, move_dir_path, to_dir_path):
         if self._is_exists(move_dir_path) and self._is_exists(to_dir_path):
-            to_new_dir_path = os.path.join(to_dir_path, os.path.basename(move_dir_path))
-            # check_ok_path = self.directory_duplicate_check(to_dir_path)
+            to_new_dir_path = self._join_path(
+                to_dir_path, os.path.basename(move_dir_path)
+            )
             if self._is_not_exists(to_new_dir_path):
                 shutil.move(move_dir_path, to_new_dir_path)
             else:
@@ -53,7 +84,9 @@ class DirectoryOperator(OsExists):
 
     def directory_copy(self, copy_dir_path, to_dir_path):
         if self._is_exists(copy_dir_path) and self._is_exists(to_dir_path):
-            to_new_dir_path = os.path.join(to_dir_path, os.path.basename(copy_dir_path))
+            to_new_dir_path = self._join_path(
+                to_dir_path, os.path.basename(copy_dir_path)
+            )
 
             if self._is_not_exists(to_new_dir_path):
                 shutil.copytree(copy_dir_path, to_new_dir_path)
@@ -94,20 +127,20 @@ class FileOperator:
         return select_path
 
     def file_create(self, create_dir_path, file_name, file_body):
-        path = os.path.join(create_dir_path, f"{file_name}.txt")
+        path = self._join_path(create_dir_path, f"{file_name}.txt")
 
         check_ok_path = self.file_duplicate_check(path)
         with open(check_ok_path) as f:
             f.write(file_body)
 
-    def file_remove(self, file_path, ret=False):
-        if ret:
+    def file_remove(self, file_path, fail_safe=False):
+        if fail_safe:
             os.remove(file_path)
 
     def file_move(self, move_file_path, to_dir_path):
         if os.path.exists(move_file_path) and os.path.exists(to_dir_path):
             check_ok_path = self.file_duplicate_check(
-                os.path.join(to_dir_path, os.path.basename(move_file_path))
+                self._join_path(to_dir_path, os.path.basename(move_file_path))
             )
             shutil.move(move_file_path, check_ok_path)
         else:
@@ -116,7 +149,7 @@ class FileOperator:
     def file_copy(self, copy_file_path, to_dir_path):
         if os.path.exists(copy_file_path) and os.path.exists(to_dir_path):
             check_ok_path = self.file_duplicate_check(
-                os.path.join(to_dir_path, os.path.basename(copy_file_path))
+                self._join_path(to_dir_path, os.path.basename(copy_file_path))
             )
             shutil.copy(copy_file_path, check_ok_path)
         else:

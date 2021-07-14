@@ -5,10 +5,11 @@ import tkinter
 
 from hellow_world import FileOperator
 from hellow_world import DirectoryOperator
-from hellow_world import OsExists
+from hellow_world import OsPathAlternative
+from hellow_world import Logger
 
 
-class DummyUnittest(unittest.TestCase, OsExists):
+class DummyUnittest(unittest.TestCase, OsPathAlternative):
     def assertExists(self, path):
         self.assertTrue(self._is_exists(path))
 
@@ -16,31 +17,42 @@ class DummyUnittest(unittest.TestCase, OsExists):
         return self.assertFalse(self._is_exists(path))
 
 
-class TestOsExists(unittest.TestCase, DirectoryOperator):
+class TestOsPathAlternative(unittest.TestCase, DirectoryOperator):
     def test__is_exists(self):
-        test_path = os.path.join(self._current_directory, "test")
+        test_path = self._join_path(self._current_directory, "test")
         self.directory_create(self._current_directory, "test")
         self.assertTrue(self._is_exists(test_path))
         self.directory_remove(test_path, True)
         self.assertFalse(self._is_exists(test_path))
 
     def test__is_not_exists(self):
-        test_path = os.path.join(self._current_directory, "test")
+        test_path = self._join_path(self._current_directory, "test")
         self.directory_create(self._current_directory, "test")
         self.assertFalse(self._is_not_exists(test_path))
         self.directory_remove(test_path, True)
         self.assertTrue(self._is_not_exists(test_path))
 
+    def test_join_path(self):
+        self.assertEqual(
+            os.path.join(os.path.expanduser("~"), "dev", "pytest"),
+            self._join_path(os.path.expanduser("~"), "dev", "pytest"),
+        )
+
+    def test__current_directory(self):
+        self.assertEqual(
+            self._join_path(os.path.expanduser("~"), "dev", "pytest"),
+            self._current_directory,
+        )
+
+
+class TestLogger(DummyUnittest, Logger):
+    def test_logger_output(self):
+        self.logger_output("DEBUG", "Logger test.")
+
 
 class TestDirectoryOperator(DummyUnittest, DirectoryOperator):
     def setUp(self):
         self.tkinter = mock.MagicMock()
-
-    def test__current_directory(self):
-        self.assertEqual(
-            os.path.join(os.path.expanduser("~"), "dev", "pytest"),
-            self._current_directory,
-        )
 
     def test__set_tkinter(self):
         del self.tkinter
@@ -58,23 +70,23 @@ class TestDirectoryOperator(DummyUnittest, DirectoryOperator):
         self.assertEqual(self._current_directory, self.directory_select())
 
     def test_directory_create(self):
-        test_path = os.path.join(self._current_directory, "test")
+        test_path = self._join_path(self._current_directory, "test")
         self.assertNotExists(test_path)
         self.directory_create(self._current_directory, "test")
         self.assertTrue(os.path.exists(test_path))
         self.directory_remove(test_path, True)
 
     def test_directory_remove(self):
-        test_path = os.path.join(self._current_directory, "test")
+        test_path = self._join_path(self._current_directory, "test")
         self.directory_create(self._current_directory, "test")
         self.assertTrue(os.path.exists(test_path))
         self.directory_remove(test_path, True)
         self.assertFalse(os.path.exists(test_path))
 
     def test_directory_move(self):
-        test_path = os.path.join(self._current_directory, "test")
-        target_path = os.path.join(self._current_directory, "target")
-        result_path = os.path.join(test_path, "target")
+        test_path = self._join_path(self._current_directory, "test")
+        target_path = self._join_path(self._current_directory, "target")
+        result_path = self._join_path(test_path, "target")
         self.directory_create(self._current_directory, "test")
         self.directory_create(self._current_directory, "target")
 
@@ -95,9 +107,9 @@ class TestDirectoryOperator(DummyUnittest, DirectoryOperator):
         self.assertFalse(os.path.exists(test_path))
 
     def test_directory_copy(self):
-        test_path = os.path.join(self._current_directory, "test")
-        target_path = os.path.join(self._current_directory, "target")
-        result_path = os.path.join(test_path, "target")
+        test_path = self._join_path(self._current_directory, "test")
+        target_path = self._join_path(self._current_directory, "target")
+        result_path = self._join_path(test_path, "target")
         self.directory_create(self._current_directory, "test")
         self.directory_create(self._current_directory, "target")
 
@@ -116,11 +128,12 @@ class TestDirectoryOperator(DummyUnittest, DirectoryOperator):
         self.assertFalse(self.directory_copy(target_path, test_path))
 
     def test_directory_duplicate_check(self):
-        dic_path = self.directory_select("ファイルを選択")
-        print(self.directory_duplicate_check(dic_path))
+        test_path = self._join_path(self._current_directory, "test")
+        print(self.directory_duplicate_check(test_path))
 
 
-class TestFileOperator(unittest.TestCase, FileOperator):
+class TestFileOperator(DummyUnittest, FileOperator):
+
     """
     def test_files_select(self):
         path = self.files_select("test_file_select")
