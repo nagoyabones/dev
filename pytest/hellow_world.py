@@ -5,7 +5,15 @@ import tkinter
 from tkinter import filedialog
 
 
-class DirectoryOperator:
+class OsExists:
+    def _is_exists(self, path):
+        return os.path.exists(path)
+
+    def _is_not_exists(self, path):
+        return False if self._is_exists(path) else True
+
+
+class DirectoryOperator(OsExists):
     @property
     def _current_directory(self):
         return os.path.abspath(os.path.dirname(__file__))
@@ -26,26 +34,35 @@ class DirectoryOperator:
     def directory_create(self, create_dir_path, create_dir_name):
         os.makedirs(os.path.join(create_dir_path, create_dir_name), exist_ok=True)
 
-    def directory_remove(self, target_path, ret=False):
-        if ret:
+    def directory_remove(self, target_path, fail_safe=False):
+        if fail_safe:
             shutil.rmtree(target_path)
 
     def directory_move(self, move_dir_path, to_dir_path):
-        if os.path.exists(move_dir_path) and os.path.exists(to_dir_path):
-            to_dir_path = os.path.join(to_dir_path, os.path.basename(move_dir_path))
-            check_ok_path = self.directory_duplicate_check(to_dir_path)
-            shutil.move(move_dir_path, check_ok_path)
+        if self._is_exists(move_dir_path) and self._is_exists(to_dir_path):
+            to_new_dir_path = os.path.join(to_dir_path, os.path.basename(move_dir_path))
+            # check_ok_path = self.directory_duplicate_check(to_dir_path)
+            if self._is_not_exists(to_new_dir_path):
+                shutil.move(move_dir_path, to_new_dir_path)
+            else:
+                print("Already exists.")
+                return False
         else:
-            print("no exists")
+            print("Not exists.")
+            return False
 
     def directory_copy(self, copy_dir_path, to_dir_path):
-        if os.path.exists(copy_dir_path) and os.path.exists(to_dir_path):
-            to_dir_path = os.path.join(to_dir_path, os.path.basename(copy_dir_path))
-            check_ok_path = self.directory_duplicate_check(to_dir_path)
-            shutil.copytree(copy_dir_path, check_ok_path)
+        if self._is_exists(copy_dir_path) and self._is_exists(to_dir_path):
+            to_new_dir_path = os.path.join(to_dir_path, os.path.basename(copy_dir_path))
 
+            if self._is_not_exists(to_new_dir_path):
+                shutil.copytree(copy_dir_path, to_new_dir_path)
+            else:
+                print("Already exists.")
+                return False
         else:
-            print("no exists")
+            print("Not exists.")
+            return False
 
     def directory_duplicate_check(self, dir_path, count=1):
         if os.path.exists(dir_path):

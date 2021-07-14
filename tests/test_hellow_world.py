@@ -5,9 +5,34 @@ import tkinter
 
 from hellow_world import FileOperator
 from hellow_world import DirectoryOperator
+from hellow_world import OsExists
 
 
-class TestDirectoryOperator(unittest.TestCase, DirectoryOperator):
+class DummyUnittest(unittest.TestCase, OsExists):
+    def assertExists(self, path):
+        self.assertTrue(self._is_exists(path))
+
+    def assertNotExists(self, path):
+        return self.assertFalse(self._is_exists(path))
+
+
+class TestOsExists(unittest.TestCase, DirectoryOperator):
+    def test__is_exists(self):
+        test_path = os.path.join(self._current_directory, "test")
+        self.directory_create(self._current_directory, "test")
+        self.assertTrue(self._is_exists(test_path))
+        self.directory_remove(test_path, True)
+        self.assertFalse(self._is_exists(test_path))
+
+    def test__is_not_exists(self):
+        test_path = os.path.join(self._current_directory, "test")
+        self.directory_create(self._current_directory, "test")
+        self.assertFalse(self._is_not_exists(test_path))
+        self.directory_remove(test_path, True)
+        self.assertTrue(self._is_not_exists(test_path))
+
+
+class TestDirectoryOperator(DummyUnittest, DirectoryOperator):
     def setUp(self):
         self.tkinter = mock.MagicMock()
 
@@ -34,38 +59,65 @@ class TestDirectoryOperator(unittest.TestCase, DirectoryOperator):
 
     def test_directory_create(self):
         test_path = os.path.join(self._current_directory, "test")
-        self.assertFalse(os.path.exists(test_path))
+        self.assertNotExists(test_path)
         self.directory_create(self._current_directory, "test")
         self.assertTrue(os.path.exists(test_path))
-        self.directory_remove(test_path)
+        self.directory_remove(test_path, True)
 
-    """
     def test_directory_remove(self):
-        path = self.directory_select("test_directory_select")
-        if path != "":
-            ret = messagebox.askyesno("確認", "フォルダを削除しますか？")
-            self.directory_remove(path, ret)
+        test_path = os.path.join(self._current_directory, "test")
+        self.directory_create(self._current_directory, "test")
+        self.assertTrue(os.path.exists(test_path))
+        self.directory_remove(test_path, True)
+        self.assertFalse(os.path.exists(test_path))
 
     def test_directory_move(self):
-        move_dic_path = self.directory_select("test_directory_select")
+        test_path = os.path.join(self._current_directory, "test")
+        target_path = os.path.join(self._current_directory, "target")
+        result_path = os.path.join(test_path, "target")
+        self.directory_create(self._current_directory, "test")
+        self.directory_create(self._current_directory, "target")
 
-        if move_dic_path != "":
-            to_dic_path = self.directory_select("test_directory_select")
-            if to_dic_path != "":
-                self.directory_move(move_dic_path, to_dic_path)
+        self.assertTrue(os.path.exists(test_path))
+        self.assertTrue(os.path.exists(target_path))
+
+        self.directory_move(target_path, test_path)
+
+        self.assertFalse(os.path.exists(target_path))
+        self.assertTrue(os.path.exists(result_path))
+
+        self.assertFalse(self.directory_move(target_path, test_path))
+
+        self.directory_create(self._current_directory, "target")
+        self.assertFalse(self.directory_move(target_path, test_path))
+
+        self.directory_remove(test_path, True)
+        self.assertFalse(os.path.exists(test_path))
 
     def test_directory_copy(self):
-        copy_dic_path = self.directory_select("test_directory_select")
+        test_path = os.path.join(self._current_directory, "test")
+        target_path = os.path.join(self._current_directory, "target")
+        result_path = os.path.join(test_path, "target")
+        self.directory_create(self._current_directory, "test")
+        self.directory_create(self._current_directory, "target")
 
-        if copy_dic_path != "":
-            to_dic_path = self.directory_select("test_directory_select")
-            if to_dic_path != "":
-                self.directory_copy(copy_dic_path, to_dic_path)
+        self.assertTrue(os.path.exists(test_path))
+        self.assertTrue(os.path.exists(target_path))
+
+        self.directory_copy(target_path, test_path)
+
+        self.assertTrue(os.path.exists(target_path))
+        self.assertTrue(os.path.exists(result_path))
+
+        self.assertFalse(self.directory_copy(target_path, test_path))
+
+        self.directory_remove(test_path, True)
+        self.directory_remove(target_path, True)
+        self.assertFalse(self.directory_copy(target_path, test_path))
 
     def test_directory_duplicate_check(self):
         dic_path = self.directory_select("ファイルを選択")
         print(self.directory_duplicate_check(dic_path))
-    """
 
 
 class TestFileOperator(unittest.TestCase, FileOperator):
