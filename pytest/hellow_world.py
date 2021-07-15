@@ -5,7 +5,7 @@ import sys
 import os
 import re
 
-from tkinter import filedialog
+import tkinter.filedialog
 
 
 class OsPathAlternative:
@@ -25,10 +25,11 @@ class OsPathAlternative:
 
 class Logger:
     def logger_output(self, level, text):
+
         logger = logging.getLogger(__name__)
         sh = logging.StreamHandler(sys.stdout)
         fmt = logging.Formatter(
-            "%(asctime)s - %(name)s - %(levelname)s - %(message)s", "%Y-%m-%dT%H:%M:%S"
+            "%(asctime)s:[%(levelname)s] %(message)s", datefmt="%b %d %H:%M:%S",
         )
         sh.setFormatter(fmt)
 
@@ -39,15 +40,13 @@ class Logger:
             "DEBUG": logging.DEBUG,
         }.get(level)
 
-        print(lev)
-
         logger.setLevel(lev)
         logger.addHandler(sh)
 
         logger.log(lev, text)
 
 
-class DirectoryOperator(OsPathAlternative):
+class SetTkinter:
     def _set_tkinter(self):
         if hasattr(self, "_window") is False:
             self._window = tkinter.Tk()
@@ -55,14 +54,20 @@ class DirectoryOperator(OsPathAlternative):
         if hasattr(self, "tkinter") is False:
             self.tkinter = tkinter
 
-    def directory_select(self):
+
+class DirectoryOperator(OsPathAlternative, Logger, SetTkinter):
+    def directory_select(self, title):
         self._set_tkinter()
-        return self.tkinter.filedialog.askdirectory(
-            title="please select directory", initialdir=self._current_directory
+        select_path = self.tkinter.filedialog.askdirectory(
+            title=title, initialdir=self._current_directory
         )
+        self.logger_output("DEBUG", f'Select directory path "{select_path}".')
+        return select_path
 
     def directory_create(self, create_dir_path, create_dir_name):
-        os.makedirs(self._join_path(create_dir_path, create_dir_name), exist_ok=True)
+        new_dir_path = self._join_path(create_dir_path, create_dir_name)
+        os.makedirs(new_dir_path, exist_ok=True)
+        self.logger_output("INFO", f'Create directory "{new_dir_path}".')
 
     def directory_remove(self, target_path, fail_safe=False):
         if fail_safe:
@@ -75,11 +80,14 @@ class DirectoryOperator(OsPathAlternative):
             )
             if self._is_not_exists(to_new_dir_path):
                 shutil.move(move_dir_path, to_new_dir_path)
+                self.logger_output(
+                    "INFO", f'Move directory "{move_dir_path}" to "{to_new_dir_path}".'
+                )
             else:
-                print("Already exists.")
+                self.logger_output("DEBUG", "Already exists.")
                 return False
         else:
-            print("Not exists.")
+            self.logger_output("DEBUG", "Not exists.")
             return False
 
     def directory_copy(self, copy_dir_path, to_dir_path):
@@ -91,14 +99,14 @@ class DirectoryOperator(OsPathAlternative):
             if self._is_not_exists(to_new_dir_path):
                 shutil.copytree(copy_dir_path, to_new_dir_path)
             else:
-                print("Already exists.")
+                self.logger_output("DEBUG", "Already exists.")
                 return False
         else:
-            print("Not exists.")
+            self.logger_output("DEBUG", "Not exists.")
             return False
 
     def directory_duplicate_check(self, dir_path, count=1):
-        if os.path.exists(dir_path):
+        if self._is_exists(dir_path):
 
             dir_name = os.path.basename(dir_path)
             tail_num_split_dir_name = re.sub(r"\(\d+\)$", "", dir_name)
@@ -114,46 +122,72 @@ class DirectoryOperator(OsPathAlternative):
             return dir_path
 
 
-class FileOperator:
-    def files_select(
-        self, title_text, init_path=os.path.abspath(os.path.dirname(__file__))
-    ):
-        root = tkinter.Tk()
-        root.withdraw()
+class FileOperator(OsPathAlternative, Logger, SetTkinter):
+    def files_select(self, title):
+        self._set_tkinter()
         file_type = [("テキストファイル", "*.txt")]
-        select_path = filedialog.askopenfilenames(
-            title=title_text, filetypes=file_type, initialdir=init_path, multiple=True
+        select_path = self.tkinter.filedialog.askopenfilenames(
+            title=title,
+            filetypes=file_type,
+            initialdir=self._current_directory,
+            multiple=True,
         )
+        self.logger_output("DEBUG", f'Select file path "{select_path}"')
         return select_path
 
     def file_create(self, create_dir_path, file_name, file_body):
-        path = self._join_path(create_dir_path, f"{file_name}.txt")
+        file_path = self._join_path(create_dir_path, f"{file_name}.txt")
 
-        check_ok_path = self.file_duplicate_check(path)
-        with open(check_ok_path) as f:
-            f.write(file_body)
+        if self._is_not_exists(file_path):
+            self.logger_output("INFO", f'Create text file "{file_path}".')
+
+            with open(file_path, "w") as f:
+                f.write(file_body)
+
+        else:
+            self.logger_output("DEBUG", "Same name text files already exists.")
+            return False
 
     def file_remove(self, file_path, fail_safe=False):
-        if fail_safe:
+        if fail_safe and self._is_exists(file_path):
             os.remove(file_path)
+            self.logger_output("INFO", f'Remove "{file_path}".')
 
     def file_move(self, move_file_path, to_dir_path):
-        if os.path.exists(move_file_path) and os.path.exists(to_dir_path):
-            check_ok_path = self.file_duplicate_check(
-                self._join_path(to_dir_path, os.path.basename(move_file_path))
+        if self._is_exists(move_file_path) and self._is_exists(to_dir_path):
+            to_new_file_path = self._join_path(
+                to_dir_path, os.path.basename(move_file_path)
             )
-            shutil.move(move_file_path, check_ok_path)
+            if self._is_not_exists(to_new_file_path):
+                shutil.move(move_file_path, to_new_file_path)
+                self.logger_output(
+                    "INFO",
+                    f'Moved directory "{move_file_path}" to "{to_new_file_path}".',
+                )
+            else:
+                self.logger_output("DEBUG", "Already exists.")
+                return False
         else:
-            print("no exists")
+            self.logger_output("DEBUG", "Not exists.")
+            return False
 
     def file_copy(self, copy_file_path, to_dir_path):
-        if os.path.exists(copy_file_path) and os.path.exists(to_dir_path):
-            check_ok_path = self.file_duplicate_check(
-                self._join_path(to_dir_path, os.path.basename(copy_file_path))
+        if self._is_exists(copy_file_path) and self._is_exists(to_dir_path):
+            to_new_file_path = self._join_path(
+                to_dir_path, os.path.basename(copy_file_path)
             )
-            shutil.copy(copy_file_path, check_ok_path)
+            if self._is_not_exists(to_new_file_path):
+                shutil.copy(copy_file_path, to_new_file_path)
+                self.logger_output(
+                    "INFO",
+                    f'Copied directory "{copy_file_path}" to "{to_new_file_path}".',
+                )
+            else:
+                self.logger_output("DEBUG", "Already exists.")
+                return False
         else:
-            print("no exists")
+            self.logger_output("DEBUG", "Not exists.")
+            return False
 
     def file_rename(self, base_file_path, rename_file_name):
         file_name, ext = os.path.splitext(os.path.basename(base_file_path))
@@ -161,12 +195,18 @@ class FileOperator:
         rename_file_path = base_file_path.replace(
             file_name + ext, rename_file_name + ext
         )
-        use_file_path = self.file_duplicate_check(rename_file_path)
-        os.rename(base_file_path, use_file_path)
+        if self._is_not_exists(rename_file_path):
+            os.rename(base_file_path, rename_file_path)
+            self.logger_output(
+                "INFO", f'Renamed "{base_file_path}" to "{rename_file_path}".',
+            )
+        else:
+            self.logger_output("DEBUG", "Already exists.")
+            return False
 
     def file_duplicate_check(self, file_path, count=1):
 
-        if os.path.exists(file_path):
+        if self._is_exists(file_path):
 
             file_name, ext = os.path.splitext(os.path.basename(file_path))
             tail_num_split_file_name = re.sub(r"\(\d+\)$", "", file_name)
@@ -184,7 +224,8 @@ class FileOperator:
 
 
 if __name__ == "__main__":
-    f = FileOperator()
     d = DirectoryOperator()
+    f = FileOperator()
 
-    file_paths = f.files_select("リネームするファイルを選択")
+    # file_paths = d.directory_select("フォルダを選択")
+    file_paths = f.files_select("フォルダを選択")
