@@ -2,11 +2,11 @@ import unittest
 import tkinter
 import os
 
-from hellow_world import DirectoryOperator
-from hellow_world import OsPathAlternative
-from hellow_world import FileOperator
-from hellow_world import SetTkinter
-from hellow_world import Logger
+from hello_world import DirectoryOperator
+from hello_world import OsPathAlternative
+from hello_world import FileOperator
+from hello_world import SetTkinter
+from hello_world import Logger
 from unittest import mock
 
 
