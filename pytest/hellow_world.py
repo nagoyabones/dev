@@ -18,6 +18,11 @@ class OsPathAlternative:
     def _join_path(self, *path):
         return os.path.join(*path)
 
+    def _split_path(self, path):
+        dir_name, base_name = os.path.split(path)
+        base_name, ext = os.path.splitext(base_name)
+        return [dir_name, base_name, ext[1:]]
+
     @property
     def _current_directory(self):
         return os.path.abspath(os.path.dirname(__file__))
@@ -48,8 +53,8 @@ class Logger:
 
 class SetTkinter:
     def _set_tkinter(self):
-        l = Logger()
-        l.logger_output("DEBUG", 'in_"set_tkinter"')
+        log_ = Logger()
+        log_.logger_output("DEBUG", 'in_"set_tkinter"')
         if hasattr(self, "_window") is False:
             self._window = tkinter.Tk()
             self._window.withdraw()
@@ -92,6 +97,7 @@ class DirectoryOperator(OsPathAlternative, Logger, SetTkinter):
             return False
 
     def directory_move(self, move_dir_path, to_dir_path):
+
         if self._is_exists(move_dir_path) and self._is_exists(to_dir_path):
             to_new_dir_path = self._join_path(
                 to_dir_path, os.path.basename(move_dir_path)

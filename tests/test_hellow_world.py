@@ -24,10 +24,11 @@ class UnittestFunctions(unittest.TestCase, OsPathAlternative):
             dir_name, base_name = os.path.split(path)
 
             if self._is_not_exists(path):
-
                 filename_and_ext = os.path.splitext(base_name)
+
                 if filename_and_ext[1] == "":
                     d.directory_create(dir_name, base_name)
+
                 else:
                     f.file_create(dir_name, filename_and_ext[0], "file_body")
 
@@ -60,10 +61,22 @@ class TestOsPathAlternative(unittest.TestCase, DirectoryOperator):
         self.directory_remove(test_path, True)
         self.assertTrue(self._is_not_exists(test_path))
 
-    def test_join_path(self):
+    def test__join_path(self):
         self.assertEqual(
             os.path.join(os.path.expanduser("~"), "dev", "pytest"),
             self._join_path(os.path.expanduser("~"), "dev", "pytest"),
+        )
+
+    def test__split_path(self):
+        dir_test_path = self._join_path(self._current_directory, "test")
+        file_test_path = self._join_path(self._current_directory, "test_text.txt")
+
+        self.assertEqual(
+            self._split_path(dir_test_path), [self._current_directory, "test", ""]
+        )
+        self.assertEqual(
+            self._split_path(file_test_path),
+            [self._current_directory, "test_text", "txt"],
         )
 
     def test__current_directory(self):
