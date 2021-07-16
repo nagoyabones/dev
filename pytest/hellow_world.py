@@ -48,6 +48,8 @@ class Logger:
 
 class SetTkinter:
     def _set_tkinter(self):
+        l = Logger()
+        l.logger_output("DEBUG", 'in_"set_tkinter"')
         if hasattr(self, "_window") is False:
             self._window = tkinter.Tk()
             self._window.withdraw()
@@ -66,12 +68,28 @@ class DirectoryOperator(OsPathAlternative, Logger, SetTkinter):
 
     def directory_create(self, create_dir_path, create_dir_name):
         new_dir_path = self._join_path(create_dir_path, create_dir_name)
-        os.makedirs(new_dir_path, exist_ok=True)
-        self.logger_output("INFO", f'Create directory "{new_dir_path}".')
+        if self._is_not_exists(new_dir_path):
+            os.makedirs(new_dir_path, exist_ok=True)
+            self.logger_output("INFO", f'Create directory "{new_dir_path}".')
+
+        else:
+            self.logger_output("DEBUG", f'"{new_dir_path}" is already exists.')
+            return False
 
     def directory_remove(self, target_path, fail_safe=False):
-        if fail_safe:
-            shutil.rmtree(target_path)
+        if self._is_exists(target_path):
+            if fail_safe:
+                shutil.rmtree(target_path)
+                self.logger_output("INFO", f'Removed directory "{target_path}".')
+            else:
+                self.logger_output(
+                    "DEBUG", 'Do not removed directory. "fail_safe" is False.',
+                )
+                return False
+
+        else:
+            self.logger_output("DEBUG", f'"{target_path}" is not exists.')
+            return False
 
     def directory_move(self, move_dir_path, to_dir_path):
         if self._is_exists(move_dir_path) and self._is_exists(to_dir_path):

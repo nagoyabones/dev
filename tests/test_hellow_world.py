@@ -10,14 +10,30 @@ from hellow_world import Logger
 from unittest import mock
 
 
-class UnittestExists(unittest.TestCase, OsPathAlternative):
+class UnittestFunctions(unittest.TestCase, OsPathAlternative):
     def assertExists(self, path):
-        self.assertTrue(self._is_exists(path))
+        return self.assertTrue(self._is_exists(path))
 
     def assertNotExists(self, path):
         return self.assertFalse(self._is_exists(path))
 
-    def remove_test_files_and_directoryes(self, *paths):
+    def assertCreateTestFiles(self, *paths):
+        d = DirectoryOperator()
+        f = FileOperator()
+        for path in paths:
+            dir_name, base_name = os.path.split(path)
+
+            if self._is_not_exists(path):
+
+                filename_and_ext = os.path.splitext(base_name)
+                if filename_and_ext[1] == "":
+                    d.directory_create(dir_name, base_name)
+                else:
+                    f.file_create(dir_name, filename_and_ext[0], "file_body")
+
+            self.assertExists(path)
+
+    def assertRemoveTestFiles(self, *paths):
         d = DirectoryOperator()
         f = FileOperator()
         for path in paths:
@@ -25,6 +41,8 @@ class UnittestExists(unittest.TestCase, OsPathAlternative):
                 d.directory_remove(path, True)
             else:
                 f.file_remove(path, True)
+
+            self.assertNotExists(path)
 
 
 class TestOsPathAlternative(unittest.TestCase, DirectoryOperator):
@@ -55,12 +73,12 @@ class TestOsPathAlternative(unittest.TestCase, DirectoryOperator):
         )
 
 
-class TestLogger(UnittestExists, Logger):
+class TestLogger(UnittestFunctions, Logger):
     def test_logger_output(self):
         self.logger_output("DEBUG", "Logger test.")
 
 
-class TestSetTkinter(UnittestExists, SetTkinter):
+class TestSetTkinter(UnittestFunctions, SetTkinter):
     def setUp(self):
         self.tkinter = mock.MagicMock()
 
@@ -69,11 +87,15 @@ class TestSetTkinter(UnittestExists, SetTkinter):
         self.assertFalse(hasattr(self, "_window"))
         self.assertFalse(hasattr(self, "tkinter"))
         self._set_tkinter()
+        self.assertTrue(hasattr(self, "_window"))
+        self.assertTrue(hasattr(self, "tkinter"))
         self.assertIsInstance(self._window, tkinter.Tk)
         self.assertIs(self.tkinter, tkinter)
 
+        self._set_tkinter()
 
-class TestDirectoryOperator(UnittestExists, DirectoryOperator):
+
+class TestDirectoryOperator(UnittestFunctions, DirectoryOperator):
     def setUp(self):
         self.tkinter = mock.MagicMock()
 
@@ -88,69 +110,68 @@ class TestDirectoryOperator(UnittestExists, DirectoryOperator):
 
     def test_directory_create(self):
         test_path = self._join_path(self._current_directory, "test")
-        self.assertNotExists(test_path)
+        self.assertRemoveTestFiles(test_path)
+
         self.directory_create(self._current_directory, "test")
-        self.assertTrue(os.path.exists(test_path))
-        self.directory_remove(test_path, True)
+        self.assertExists(test_path)
+
+        self.assertFalse(self.directory_create(self._current_directory, "test"))
+
+        self.assertRemoveTestFiles(test_path)
 
     def test_directory_remove(self):
         test_path = self._join_path(self._current_directory, "test")
-        self.directory_create(self._current_directory, "test")
-        self.assertTrue(os.path.exists(test_path))
+        self.assertRemoveTestFiles(test_path)
+        self.assertCreateTestFiles(test_path)
+
+        self.assertFalse(self.directory_remove(test_path, False))
+
         self.directory_remove(test_path, True)
-        self.assertFalse(os.path.exists(test_path))
+        self.assertNotExists(test_path)
 
     def test_directory_move(self):
         test_path = self._join_path(self._current_directory, "test")
         target_path = self._join_path(self._current_directory, "target")
         result_path = self._join_path(test_path, "target")
-        self.directory_create(self._current_directory, "test")
-        self.directory_create(self._current_directory, "target")
+        self.assertRemoveTestFiles(test_path, target_path, result_path)
+        self.assertCreateTestFiles(test_path, target_path)
 
-        self.assertTrue(os.path.exists(test_path))
-        self.assertTrue(os.path.exists(target_path))
+        self.assertNotExists(result_path)
 
         self.directory_move(target_path, test_path)
-
-        self.assertFalse(os.path.exists(target_path))
-        self.assertTrue(os.path.exists(result_path))
+        self.assertExists(result_path)
+        self.assertNotExists(target_path)
 
         self.assertFalse(self.directory_move(target_path, test_path))
 
         self.directory_create(self._current_directory, "target")
         self.assertFalse(self.directory_move(target_path, test_path))
 
-        self.directory_remove(test_path, True)
-        self.assertNotExists(test_path)
-        self.directory_remove(target_path, True)
-        self.assertNotExists(target_path)
+        self.assertRemoveTestFiles(test_path, target_path)
 
     def test_directory_copy(self):
         test_path = self._join_path(self._current_directory, "test")
         target_path = self._join_path(self._current_directory, "target")
         result_path = self._join_path(test_path, "target")
-        self.directory_create(self._current_directory, "test")
-        self.directory_create(self._current_directory, "target")
+        self.assertRemoveTestFiles(test_path, target_path, result_path)
+        self.assertCreateTestFiles(test_path, target_path)
 
-        self.assertTrue(os.path.exists(test_path))
-        self.assertTrue(os.path.exists(target_path))
+        self.assertNotExists(result_path)
 
         self.directory_copy(target_path, test_path)
-
-        self.assertTrue(os.path.exists(target_path))
-        self.assertTrue(os.path.exists(result_path))
+        self.assertExists(target_path)
+        self.assertExists(result_path)
 
         self.assertFalse(self.directory_copy(target_path, test_path))
 
-        self.directory_remove(test_path, True)
-        self.directory_remove(target_path, True)
+        self.assertRemoveTestFiles(test_path, target_path)
         self.assertFalse(self.directory_copy(target_path, test_path))
 
     def test_directory_duplicate_check(self):
         test_path = self._join_path(self._current_directory, "test")
         test_check_path = self._join_path(self._current_directory, "test(1)")
-
-        self.directory_create(self._current_directory, "test")
+        self.assertRemoveTestFiles(test_path, test_check_path)
+        self.assertCreateTestFiles(test_path)
 
         test_check_ok_path = self.directory_duplicate_check(test_path)
         self.assertEqual(test_check_path, test_check_ok_path)
@@ -161,56 +182,58 @@ class TestDirectoryOperator(UnittestExists, DirectoryOperator):
         self.assertEqual(test_path, test_check_ok_path)
 
 
-class TestFileOperator(UnittestExists, FileOperator):
+class TestFileOperator(UnittestFunctions, FileOperator):
     def setUp(self):
         self.tkinter = mock.MagicMock()
 
     def test_files_select(self):
+        test_path = self._join_path(self._current_directory, "test_text.txt")
+        self.assertRemoveTestFiles(test_path)
+        self.assertCreateTestFiles(test_path)
+
         def askopenfilenames(title, filetypes, initialdir, multiple):
-            return initialdir
+            return test_path
 
         self.tkinter.filedialog.askopenfilenames = askopenfilenames
         file_path = self.files_select("File_select_test")
 
-        self.assertEqual(self._current_directory, file_path)
+        self.assertEqual(test_path, file_path)
+
+        self.assertRemoveTestFiles(test_path)
 
     def test_file_create(self):
         test_path = self._join_path(self._current_directory, "test_text.txt")
-        self.assertNotExists(test_path)
+        self.assertRemoveTestFiles(test_path)
 
-        self.file_create(self._current_directory, "test_text", "hello world.")
+        self.file_create(self._current_directory, "test_text", "text_body")
         self.assertExists(test_path)
 
-        self.file_create(self._current_directory, "test_text", "hello world.")
+        self.assertFalse(
+            self.file_create(self._current_directory, "test_text", "text_body")
+        )
 
-        self.file_remove(test_path, True)
+        self.assertRemoveTestFiles(test_path)
 
     def test_file_remove(self):
         test_path = self._join_path(self._current_directory, "test_text.txt")
-        self.file_create(self._current_directory, "test_text", "hello world")
-        self.assertExists(test_path)
+        self.assertRemoveTestFiles(test_path)
+        self.assertCreateTestFiles(test_path)
 
-        self.file_remove(test_path, False)
-        self.assertExists(test_path)
+        self.assertFalse(self.file_remove(test_path, False))
 
         self.file_remove(test_path, True)
         self.assertNotExists(test_path)
 
     def test_file_move(self):
-        d = DirectoryOperator()
-
         test_path = self._join_path(self._current_directory, "test_text.txt")
         to_path = self._join_path(self._current_directory, "test_in")
         result_path = self._join_path(to_path, "test_text.txt")
+        self.assertRemoveTestFiles(test_path, to_path, result_path)
+        self.assertCreateTestFiles(test_path, to_path)
 
-        self.file_create(self._current_directory, "test_text", "hello world")
-        d.directory_create(self._current_directory, "test_in")
-
-        self.assertExists(test_path)
         self.assertNotExists(result_path)
 
         self.file_move(test_path, to_path)
-
         self.assertExists(result_path)
         self.assertNotExists(test_path)
 
@@ -219,60 +242,49 @@ class TestFileOperator(UnittestExists, FileOperator):
         self.file_create(self._current_directory, "test_text", "")
         self.assertFalse(self.file_move(test_path, to_path))
 
-        self.file_remove(test_path, True)
-        d.directory_remove(to_path, True)
+        self.assertRemoveTestFiles(test_path, to_path)
 
     def test_file_copy(self):
-        d = DirectoryOperator()
-
         test_path = self._join_path(self._current_directory, "test_text.txt")
         to_path = self._join_path(self._current_directory, "test_in")
         result_path = self._join_path(to_path, "test_text.txt")
+        self.assertRemoveTestFiles(test_path, to_path, result_path)
+        self.assertCreateTestFiles(test_path, to_path)
 
-        self.remove_test_files_and_directoryes(test_path, to_path, result_path)
-
-        self.file_create(self._current_directory, "test_text", "hello world")
-        d.directory_create(self._current_directory, "test_in")
-
-        self.assertExists(test_path)
         self.assertNotExists(result_path)
 
         self.file_copy(test_path, to_path)
-
         self.assertExists(result_path)
         self.assertExists(test_path)
 
         self.assertFalse(self.file_copy(test_path, to_path))
 
-        self.file_remove(test_path, True)
-        d.directory_remove(to_path, True)
+        self.assertRemoveTestFiles(test_path, to_path)
+        self.assertFalse(self.file_copy(to_path, test_path))
 
     def test_file_rename(self):
-        test_path = self._join_path(self._current_directory, "test_text.txt")
         rename = "test_text_2"
+        test_path = self._join_path(self._current_directory, "test_text.txt")
         rename_path = self._join_path(self._current_directory, f"{rename}.txt")
+        self.assertRemoveTestFiles(test_path, rename_path)
+        self.assertCreateTestFiles(test_path)
 
-        self.file_create(self._current_directory, "test_text", "hello world")
-        self.assertExists(test_path)
         self.assertNotExists(rename_path)
 
         self.file_rename(test_path, rename)
         self.assertNotExists(test_path)
         self.assertExists(rename_path)
 
-        self.file_create(self._current_directory, "test_text", "hello world")
+        self.file_create(self._current_directory, "test_text", "text_body")
         self.assertFalse(self.file_rename(test_path, rename))
 
-        self.file_remove(test_path, True)
-        self.file_remove(rename_path, True)
+        self.assertRemoveTestFiles(test_path, rename_path)
 
     def test_file_duplicate_check(self):
         test_path = self._join_path(self._current_directory, "test.txt")
         test_check_path = self._join_path(self._current_directory, "test(1).txt")
-
-        self.remove_test_files_and_directoryes(test_path, test_check_path)
-
-        self.file_create(self._current_directory, "test", "hello world")
+        self.assertRemoveTestFiles(test_path, test_check_path)
+        self.assertCreateTestFiles(test_path)
 
         test_check_ok_path = self.file_duplicate_check(test_path)
         self.assertEqual(test_check_path, test_check_ok_path)

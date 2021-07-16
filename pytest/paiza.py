@@ -1,53 +1,55 @@
-"""
-import numpy as np
+n, m, k = list(map(int, input().split(" ")))
+sugoroku_map = [[0, 0]]
+players = [[0 for x in range(2)] for y in range(m)]
+arrival_rank = []
 
+for _ in range(n - 2):
+    move, coin = list(map(int, input().split(" ")))
+    sugoroku_map.append([move, coin])
+sugoroku_map.append([0, 0])
 
-def decimal_to_bin_int_arr(num, digits):
-    bin_str = format(num, str(digits) + "b")
-    bin_int_arr = np.array(list(map(int, bin_str.replace(" ", "0"))))
-    return bin_int_arr
+for i in range(k):
 
+    move = list(map(int, input().split(" ")))
 
-exam_num = int(input())
-exam_point = []
-result_arr = []
-bin_num = 0
-bin_arr = decimal_to_bin_int_arr(bin_num, exam_num)
+    for i in range(m):
+        if (i in arrival_rank) is False:
 
-for _ in range(exam_num):
-    exam_point.append(int(input()))
-point_arr = np.array(exam_point)
+            p_position = players[i][0]
+            p_coin = players[i][1]
 
-while sum(bin_arr) <= exam_num and bin_arr.size == exam_num:
-    result_arr.append(sum(point_arr * bin_arr))
+            p_position = min(n - 1, max(0, p_position + move[i]))
 
-    bin_num += 1
-    bin_arr = decimal_to_bin_int_arr(bin_num, exam_num)
+            if p_position < n - 1:
+                players[i][0] = p_position
+                map_data = sugoroku_map[p_position]
+                command_move = map_data[0]
+                get_coin = map_data[1]
 
-ans = sorted(list(set(result_arr)))
+                players[i][1] = max(0, p_coin + get_coin)
 
-print(len(ans))
-for data in ans:
-    print(data)
-"""
+                p_position = min(n - 1, max(0, p_position + command_move))
+                players[i][0] = p_position
 
-import itertools
+                if p_position >= n - 1:
+                    arrival_rank.append(i)
 
-exam_num = int(input())
-exam_point = []
-result = []
-ans = [0]
-for _ in range(exam_num):
-    exam_point.append(int(input()))
+            elif p_position >= n - 1:
+                arrival_rank.append(i)
 
-for i in range(1, exam_num + 1):
-    result += list(itertools.combinations(exam_point, i))
+        else:
+            if arrival_rank.index(i) == 0:
+                players[i][1] = players[i][1] + move[i] * 3
+            elif arrival_rank == 1:
+                players[i][1] = players[i][1] + move[i] * 2
+            elif arrival_rank == 2:
+                players[i][1] = players[i][1] + move[i] * 1
 
-for data in result:
-    ans.append(sum(data))
+rank = []
+for data in players:
+    rank.append(data[1])
 
-ans = sorted(list(set(ans)))
+max_coin = max(rank)
+player = rank.index(max_coin) + 1
 
-print(len(ans))
-for data in ans:
-    print(data)
+print(player, max_coin)
