@@ -21,7 +21,7 @@ class OsPathAlternative:
     def _split_path(self, path):
         dir_name, base_name = os.path.split(path)
         base_name, ext = os.path.splitext(base_name)
-        return [dir_name, base_name, ext[1:]]
+        return [dir_name, base_name, ext]
 
     @property
     def _current_directory(self):
@@ -97,11 +97,11 @@ class DirectoryOperator(OsPathAlternative, Logger, SetTkinter):
             return False
 
     def directory_move(self, move_dir_path, to_dir_path):
+        base_name = self._split_path(move_dir_path)[1]
 
         if self._is_exists(move_dir_path) and self._is_exists(to_dir_path):
-            to_new_dir_path = self._join_path(
-                to_dir_path, os.path.basename(move_dir_path)
-            )
+            to_new_dir_path = self._join_path(to_dir_path, base_name)
+
             if self._is_not_exists(to_new_dir_path):
                 shutil.move(move_dir_path, to_new_dir_path)
                 self.logger_output(
@@ -115,13 +115,16 @@ class DirectoryOperator(OsPathAlternative, Logger, SetTkinter):
             return False
 
     def directory_copy(self, copy_dir_path, to_dir_path):
+        base_name = self._split_path(copy_dir_path)[1]
+
         if self._is_exists(copy_dir_path) and self._is_exists(to_dir_path):
-            to_new_dir_path = self._join_path(
-                to_dir_path, os.path.basename(copy_dir_path)
-            )
+            to_new_dir_path = self._join_path(to_dir_path, base_name)
 
             if self._is_not_exists(to_new_dir_path):
                 shutil.copytree(copy_dir_path, to_new_dir_path)
+                self.logger_output(
+                    "INFO", f'Copy directory "{copy_dir_path}" to "{to_new_dir_path}".'
+                )
             else:
                 self.logger_output("DEBUG", "Already exists.")
                 return False
@@ -131,18 +134,20 @@ class DirectoryOperator(OsPathAlternative, Logger, SetTkinter):
 
     def directory_duplicate_check(self, dir_path, count=1):
         if self._is_exists(dir_path):
-
-            dir_name = os.path.basename(dir_path)
-            tail_num_split_dir_name = re.sub(r"\(\d+\)$", "", dir_name)
+            base_name = self._split_path(dir_path)[1]
+            tail_num_split_dir_name = re.sub(r"\(\d+\)$", "", base_name)
             tail = "(" + str(count) + ")"
 
             rename_dir_path = dir_path[::-1].replace(
-                dir_name[::-1], (tail_num_split_dir_name + tail)[::-1], 1
+                base_name[::-1], (tail_num_split_dir_name + tail)[::-1], 1
             )
-
-            return self.directory_duplicate_check(rename_dir_path[::-1], count + 1)
+            check_ok_path = self.directory_duplicate_check(
+                rename_dir_path[::-1], count + 1
+            )
+            return check_ok_path
 
         else:
+            self.logger_output("DEBUG", f'Return check ok path is "{dir_path}"')
             return dir_path
 
 
@@ -178,46 +183,50 @@ class FileOperator(OsPathAlternative, Logger, SetTkinter):
             self.logger_output("INFO", f'Remove "{file_path}".')
 
     def file_move(self, move_file_path, to_dir_path):
+        base_name, ext = self._split_path(move_file_path)[1:]
+
         if self._is_exists(move_file_path) and self._is_exists(to_dir_path):
-            to_new_file_path = self._join_path(
-                to_dir_path, os.path.basename(move_file_path)
-            )
+            to_new_file_path = self._join_path(to_dir_path, base_name + ext)
+
             if self._is_not_exists(to_new_file_path):
                 shutil.move(move_file_path, to_new_file_path)
                 self.logger_output(
-                    "INFO",
-                    f'Moved directory "{move_file_path}" to "{to_new_file_path}".',
+                    "INFO", f'Moved file "{move_file_path}" to "{to_new_file_path}".',
                 )
+
             else:
                 self.logger_output("DEBUG", "Already exists.")
                 return False
+
         else:
             self.logger_output("DEBUG", "Not exists.")
             return False
 
     def file_copy(self, copy_file_path, to_dir_path):
+        base_name, ext = self._split_path(copy_file_path)[1:]
+
         if self._is_exists(copy_file_path) and self._is_exists(to_dir_path):
-            to_new_file_path = self._join_path(
-                to_dir_path, os.path.basename(copy_file_path)
-            )
+            to_new_file_path = self._join_path(to_dir_path, base_name + ext)
+
             if self._is_not_exists(to_new_file_path):
                 shutil.copy(copy_file_path, to_new_file_path)
                 self.logger_output(
-                    "INFO",
-                    f'Copied directory "{copy_file_path}" to "{to_new_file_path}".',
+                    "INFO", f'Copied file "{copy_file_path}" to "{to_new_file_path}".',
                 )
+
             else:
                 self.logger_output("DEBUG", "Already exists.")
                 return False
+
         else:
             self.logger_output("DEBUG", "Not exists.")
             return False
 
     def file_rename(self, base_file_path, rename_file_name):
-        file_name, ext = os.path.splitext(os.path.basename(base_file_path))
+        base_name, ext = self._split_path(base_file_path)[1:]
 
         rename_file_path = base_file_path.replace(
-            file_name + ext, rename_file_name + ext
+            base_name + ext, rename_file_name + ext
         )
         if self._is_not_exists(rename_file_path):
             os.rename(base_file_path, rename_file_path)
@@ -231,19 +240,19 @@ class FileOperator(OsPathAlternative, Logger, SetTkinter):
     def file_duplicate_check(self, file_path, count=1):
 
         if self._is_exists(file_path):
-
-            file_name, ext = os.path.splitext(os.path.basename(file_path))
-            tail_num_split_file_name = re.sub(r"\(\d+\)$", "", file_name)
+            base_name, ext = self._split_path(file_path)[1:]
+            del_tail_num_file_name = re.sub(r"\(\d+\)$", "", base_name)
 
             tail = "(" + str(count) + ")"
 
             rename_file_path = file_path.replace(
-                file_name + ext, tail_num_split_file_name + tail + ext
+                base_name + ext, del_tail_num_file_name + tail + ext
             )
-
-            return self.file_duplicate_check(rename_file_path, count + 1)
+            check_ok_path = self.file_duplicate_check(rename_file_path, count + 1)
+            return check_ok_path
 
         else:
+            self.logger_output("DEBUG", f'Return check ok path is "{file_path}"')
             return file_path
 
 
@@ -251,5 +260,4 @@ if __name__ == "__main__":
     d = DirectoryOperator()
     f = FileOperator()
 
-    # file_paths = d.directory_select("フォルダを選択")
     file_paths = f.files_select("フォルダを選択")

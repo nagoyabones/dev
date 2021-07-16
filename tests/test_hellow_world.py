@@ -76,7 +76,7 @@ class TestOsPathAlternative(unittest.TestCase, DirectoryOperator):
         )
         self.assertEqual(
             self._split_path(file_test_path),
-            [self._current_directory, "test_text", "txt"],
+            [self._current_directory, "test_text", ".txt"],
         )
 
     def test__current_directory(self):
