@@ -180,6 +180,24 @@ class TestDirectoryOperator(UnittestFunctions, DirectoryOperator):
         self.assertRemoveTestFiles(test_path, target_path)
         self.assertFalse(self.directory_copy(target_path, test_path))
 
+    def test_directory_rename(self):
+        rename = "test_2"
+        test_path = self._join_path(self._current_directory, "test")
+        rename_path = self._join_path(self._current_directory, f"{rename}")
+        self.assertRemoveTestFiles(test_path, rename_path)
+        self.assertCreateTestFiles(test_path)
+
+        self.assertNotExists(rename_path)
+
+        self.directory_rename(test_path, rename)
+        self.assertNotExists(test_path)
+        self.assertExists(rename_path)
+
+        self.directory_create(self._current_directory, "test")
+        self.assertFalse(self.directory_rename(test_path, rename))
+
+        self.assertRemoveTestFiles(test_path, rename_path)
+
     def test_directory_duplicate_check(self):
         test_path = self._join_path(self._current_directory, "test")
         test_check_path = self._join_path(self._current_directory, "test(1)")

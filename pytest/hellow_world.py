@@ -132,18 +132,31 @@ class DirectoryOperator(OsPathAlternative, Logger, SetTkinter):
             self.logger_output("DEBUG", "Not exists.")
             return False
 
+    def directory_rename(self, base_dir_path, rename_dir_name):
+        dir_path = self._split_path(base_dir_path)[0]
+        rename_dir_path = self._join_path(dir_path, rename_dir_name)
+
+        if self._is_not_exists(rename_dir_path):
+            os.rename(base_dir_path, rename_dir_path)
+            self.logger_output(
+                "INFO", f'Renamed "{base_dir_path}" to "{rename_dir_path}".',
+            )
+
+        else:
+            self.logger_output("DEBUG", "Already exists.")
+            return False
+
     def directory_duplicate_check(self, dir_path, count=1):
         if self._is_exists(dir_path):
-            base_name = self._split_path(dir_path)[1]
-            tail_num_split_dir_name = re.sub(r"\(\d+\)$", "", base_name)
-            tail = "(" + str(count) + ")"
+            dir_path, base_name = self._split_path(dir_path)[0:2]
 
-            rename_dir_path = dir_path[::-1].replace(
-                base_name[::-1], (tail_num_split_dir_name + tail)[::-1], 1
-            )
-            check_ok_path = self.directory_duplicate_check(
-                rename_dir_path[::-1], count + 1
-            )
+            tail_num_split_dir_name = re.sub(r"\(\d+\)$", "", base_name)
+            tail_num = "(" + str(count) + ")"
+            new_dir_name = tail_num_split_dir_name + tail_num
+
+            rename_dir_path = self._join_path(dir_path, new_dir_name)
+
+            check_ok_path = self.directory_duplicate_check(rename_dir_path, count + 1)
             return check_ok_path
 
         else:
@@ -223,31 +236,29 @@ class FileOperator(OsPathAlternative, Logger, SetTkinter):
             return False
 
     def file_rename(self, base_file_path, rename_file_name):
-        base_name, ext = self._split_path(base_file_path)[1:]
+        dir_path, base_name, ext = self._split_path(base_file_path)
+        rename_file_path = self._join_path(dir_path, rename_file_name + ext)
 
-        rename_file_path = base_file_path.replace(
-            base_name + ext, rename_file_name + ext
-        )
         if self._is_not_exists(rename_file_path):
             os.rename(base_file_path, rename_file_path)
             self.logger_output(
                 "INFO", f'Renamed "{base_file_path}" to "{rename_file_path}".',
             )
+
         else:
             self.logger_output("DEBUG", "Already exists.")
             return False
 
     def file_duplicate_check(self, file_path, count=1):
-
         if self._is_exists(file_path):
-            base_name, ext = self._split_path(file_path)[1:]
+            dir_path, base_name, ext = self._split_path(file_path)
+
             del_tail_num_file_name = re.sub(r"\(\d+\)$", "", base_name)
+            tail_num = "(" + str(count) + ")"
+            new_file_name = del_tail_num_file_name + tail_num + ext
 
-            tail = "(" + str(count) + ")"
+            rename_file_path = self._join_path(dir_path, new_file_name)
 
-            rename_file_path = file_path.replace(
-                base_name + ext, del_tail_num_file_name + tail + ext
-            )
             check_ok_path = self.file_duplicate_check(rename_file_path, count + 1)
             return check_ok_path
 
