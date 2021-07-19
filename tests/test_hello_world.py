@@ -202,7 +202,7 @@ class TestDirectoryOperator(UnittestFunctions, DirectoryOperator):
     def test_directory_rename(self):
         rename = "test_2"
         rename_path = self._join_path(self._current_directory, f"{rename}")
-        self.assertRemoveTestFiles(self._test_path, rename_path)
+        self.assertRemoveTestFiles(rename_path)
         self.assertCreateTestFiles(
             self._test_path,
         )
@@ -218,20 +218,22 @@ class TestDirectoryOperator(UnittestFunctions, DirectoryOperator):
         self.directory_create(self._current_directory, "test")
         self.assertFalse(self.directory_rename(self._test_path, rename))
 
-        self.assertRemoveTestFiles(self._test_path, rename_path)
+        self.assertRemoveTestFiles(rename_path)
 
     def test_directory_duplicate_check(self):
         test_check_path = self._join_path(self._current_directory, "test(1)")
-        self.assertRemoveTestFiles(self._test_path, test_check_path)
+        self.assertRemoveTestFiles(test_check_path)
         self.assertCreateTestFiles(self._test_path)
 
-        test_check_ok_path = self.directory_duplicate_check(self._test_path)
-        self.assertEqual(test_check_path, test_check_ok_path)
+        self.assertEqual(
+            test_check_path, self.directory_duplicate_check(self._test_path)
+        )
 
         self.directory_remove(self._test_path, True)
 
-        test_check_ok_path = self.directory_duplicate_check(self._test_path)
-        self.assertEqual(self._test_path, test_check_ok_path)
+        self.assertEqual(
+            self._test_path, self.directory_duplicate_check(self._test_path)
+        )
 
 
 class TestFileOperator(mock.MagicMock, FileOperator):
