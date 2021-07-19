@@ -15,6 +15,11 @@ from hello_world import (
 from unittest import mock
 
 
+class DummyOperator(DirectoryOperator, FileOperator):
+    def logger_output(self, *args, **kwargs):
+        return
+
+
 class UnittestFunctions(unittest.TestCase, OsPathAlternative):
     def assertExists(self, path):
         return self.assertTrue(self._is_exists(path))
@@ -23,8 +28,7 @@ class UnittestFunctions(unittest.TestCase, OsPathAlternative):
         return self.assertFalse(self._is_exists(path))
 
     def assertCreateTestFiles(self, *paths):
-        d = DirectoryOperator()
-        f = FileOperator()
+        d = DummyOperator()
         for path in paths:
             dir_name, base_name = os.path.split(path)
 
@@ -35,18 +39,17 @@ class UnittestFunctions(unittest.TestCase, OsPathAlternative):
                     d.directory_create(dir_name, base_name)
 
                 else:
-                    f.file_create(dir_name, filename_and_ext[0], "file_body")
+                    d.file_create(dir_name, filename_and_ext[0], "file_body")
 
             self.assertExists(path)
 
     def assertRemoveTestFiles(self, *paths):
-        d = DirectoryOperator()
-        f = FileOperator()
+        d = DummyOperator()
         for path in paths:
             if os.path.isdir(path):
                 d.directory_remove(path, True)
             else:
-                f.file_remove(path, True)
+                d.file_remove(path, True)
 
             self.assertNotExists(path)
 
@@ -138,9 +141,11 @@ class TestDirectoryOperator(UnittestFunctions, DirectoryOperator):
         self._init()
         self.tkinter = mock.MagicMock()
         self._log = mock.MagicMock()
+
         self._test_path = self._join_path(self._current_directory, "test")
         self._target_path = self._join_path(self._current_directory, "target")
         self._result_path = self._join_path(self._test_path, "target")
+
         self.assertRemoveTestFiles(self._test_path)
         self.assertRemoveTestFiles(self._target_path)
         self.assertRemoveTestFiles(self._result_path)
@@ -149,6 +154,9 @@ class TestDirectoryOperator(UnittestFunctions, DirectoryOperator):
         self.assertRemoveTestFiles(self._test_path)
         self.assertRemoveTestFiles(self._target_path)
         self.assertRemoveTestFiles(self._result_path)
+
+    def logger_output(self, *args, **kwargs):
+        return
 
     def test_directory_select(self):
         def askdirectory(title, initialdir):

@@ -34,25 +34,25 @@ class Logger:
 
     def _init(self):
         self._logger = logging.getLogger(__name__)
-        sh = logging.StreamHandler(sys.stdout)
-        fmt = logging.Formatter(
-            "%(asctime)s:[%(levelname)s] %(message)s",
-            datefmt="%b %d %H:%M:%S",
-        )
-        sh.setFormatter(fmt)
-
         self._lev = {
             "ERROR": logging.ERROR,
             "WARNING": logging.WARNING,
             "INFO": logging.INFO,
             "DEBUG": logging.DEBUG,
         }
-
-        self._logger.addHandler(sh)
+        self._stream = logging.StreamHandler(sys.stdout)
+        self._stream.setFormatter(
+            logging.Formatter(
+                "%(asctime)s:[%(levelname)s] %(message)s",
+                datefmt="%b %d %H:%M:%S",
+            )
+        )
 
     def logger_output(self, level, text):
+        self._logger.addHandler(self._stream)
         self._logger.setLevel((level_ := self._lev.get(level)))
         self._logger.log(level_, text)
+        self._logger.removeHandler(self._stream)
 
 
 class SetTkinter:
