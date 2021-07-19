@@ -74,33 +74,33 @@ class DirectoryOperator(OsPathAlternative, Logger, SetTkinter):
         select_path = self.tkinter.filedialog.askdirectory(
             title=title, initialdir=self._current_directory
         )
-        self.logger_output("DEBUG", f'Select directory path "{select_path}".')
+        self._log.logger_output("DEBUG", f'Select directory path "{select_path}".')
         return select_path
 
     def directory_create(self, create_dir_path, create_dir_name):
         new_dir_path = self._join_path(create_dir_path, create_dir_name)
         if self._is_not_exists(new_dir_path):
             os.makedirs(new_dir_path, exist_ok=True)
-            self.logger_output("INFO", f'Create directory "{new_dir_path}".')
+            self._log.logger_output("INFO", f'Create directory "{new_dir_path}".')
 
         else:
-            self.logger_output("DEBUG", f'"{new_dir_path}" is already exists.')
+            self._log.logger_output("DEBUG", f'"{new_dir_path}" is already exists.')
             return False
 
     def directory_remove(self, target_path, fail_safe=False):
         if self._is_exists(target_path):
             if fail_safe:
                 shutil.rmtree(target_path)
-                self.logger_output("INFO", f'Removed directory "{target_path}".')
+                self._log.logger_output("INFO", f'Removed directory "{target_path}".')
             else:
-                self.logger_output(
+                self._log.logger_output(
                     "DEBUG",
                     'Do not removed directory. "fail_safe" is False.',
                 )
                 return False
 
         else:
-            self.logger_output("DEBUG", f'"{target_path}" is not exists.')
+            self._log.logger_output("DEBUG", f'"{target_path}" is not exists.')
             return False
 
     def directory_move(self, move_dir_path, to_dir_path):
@@ -111,14 +111,14 @@ class DirectoryOperator(OsPathAlternative, Logger, SetTkinter):
 
             if self._is_not_exists(to_new_dir_path):
                 shutil.move(move_dir_path, to_new_dir_path)
-                self.logger_output(
+                self._log.logger_output(
                     "INFO", f'Move directory "{move_dir_path}" to "{to_new_dir_path}".'
                 )
             else:
-                self.logger_output("DEBUG", "Already exists.")
+                self._log.logger_output("DEBUG", "Already exists.")
                 return False
         else:
-            self.logger_output("DEBUG", "Not exists.")
+            self._log.logger_output("DEBUG", "Not exists.")
             return False
 
     def directory_copy(self, copy_dir_path, to_dir_path):
@@ -129,14 +129,14 @@ class DirectoryOperator(OsPathAlternative, Logger, SetTkinter):
 
             if self._is_not_exists(to_new_dir_path):
                 shutil.copytree(copy_dir_path, to_new_dir_path)
-                self.logger_output(
+                self._log.logger_output(
                     "INFO", f'Copy directory "{copy_dir_path}" to "{to_new_dir_path}".'
                 )
             else:
-                self.logger_output("DEBUG", "Already exists.")
+                self._log.logger_output("DEBUG", "Already exists.")
                 return False
         else:
-            self.logger_output("DEBUG", "Not exists.")
+            self._log.logger_output("DEBUG", "Not exists.")
             return False
 
     def directory_rename(self, base_dir_path, rename_dir_name):
@@ -145,13 +145,13 @@ class DirectoryOperator(OsPathAlternative, Logger, SetTkinter):
 
         if self._is_not_exists(rename_dir_path):
             os.rename(base_dir_path, rename_dir_path)
-            self.logger_output(
+            self._log.logger_output(
                 "INFO",
                 f'Renamed "{base_dir_path}" to "{rename_dir_path}".',
             )
 
         else:
-            self.logger_output("DEBUG", "Already exists.")
+            self._log.logger_output("DEBUG", "Already exists.")
             return False
 
     def directory_duplicate_check(self, dir_path, count=1):
@@ -168,7 +168,7 @@ class DirectoryOperator(OsPathAlternative, Logger, SetTkinter):
             return check_ok_path
 
         else:
-            self.logger_output("DEBUG", f'Return check ok path is "{dir_path}"')
+            self._log.logger_output("DEBUG", f'Return check ok path is "{dir_path}"')
             return dir_path
 
 
@@ -182,26 +182,26 @@ class FileOperator(OsPathAlternative, Logger, SetTkinter):
             initialdir=self._current_directory,
             multiple=True,
         )
-        self.logger_output("DEBUG", f'Select file path "{select_path}"')
+        self._log.logger_output("DEBUG", f'Select file path "{select_path}"')
         return select_path
 
     def file_create(self, create_dir_path, file_name, file_body):
         file_path = self._join_path(create_dir_path, f"{file_name}.txt")
 
         if self._is_not_exists(file_path):
-            self.logger_output("INFO", f'Create text file "{file_path}".')
+            self._log.logger_output("INFO", f'Create text file "{file_path}".')
 
             with open(file_path, "w") as f:
                 f.write(file_body)
 
         else:
-            self.logger_output("DEBUG", "Same name text files already exists.")
+            self._log.logger_output("DEBUG", "Same name text files already exists.")
             return False
 
     def file_remove(self, file_path, fail_safe=False):
         if fail_safe and self._is_exists(file_path):
             os.remove(file_path)
-            self.logger_output("INFO", f'Remove "{file_path}".')
+            self._log.logger_output("INFO", f'Remove "{file_path}".')
 
     def file_move(self, move_file_path, to_dir_path):
         base_name, ext = self._split_path(move_file_path)[1:]
@@ -211,17 +211,17 @@ class FileOperator(OsPathAlternative, Logger, SetTkinter):
 
             if self._is_not_exists(to_new_file_path):
                 shutil.move(move_file_path, to_new_file_path)
-                self.logger_output(
+                self._log.logger_output(
                     "INFO",
                     f'Moved file "{move_file_path}" to "{to_new_file_path}".',
                 )
 
             else:
-                self.logger_output("DEBUG", "Already exists.")
+                self._log.logger_output("DEBUG", "Already exists.")
                 return False
 
         else:
-            self.logger_output("DEBUG", "Not exists.")
+            self._log.logger_output("DEBUG", "Not exists.")
             return False
 
     def file_copy(self, copy_file_path, to_dir_path):
@@ -232,17 +232,17 @@ class FileOperator(OsPathAlternative, Logger, SetTkinter):
 
             if self._is_not_exists(to_new_file_path):
                 shutil.copy(copy_file_path, to_new_file_path)
-                self.logger_output(
+                self._log.logger_output(
                     "INFO",
                     f'Copied file "{copy_file_path}" to "{to_new_file_path}".',
                 )
 
             else:
-                self.logger_output("DEBUG", "Already exists.")
+                self._log.logger_output("DEBUG", "Already exists.")
                 return False
 
         else:
-            self.logger_output("DEBUG", "Not exists.")
+            self._log.logger_output("DEBUG", "Not exists.")
             return False
 
     def file_rename(self, base_file_path, rename_file_name):
@@ -251,13 +251,13 @@ class FileOperator(OsPathAlternative, Logger, SetTkinter):
 
         if self._is_not_exists(rename_file_path):
             os.rename(base_file_path, rename_file_path)
-            self.logger_output(
+            self._log.logger_output(
                 "INFO",
                 f'Renamed "{base_file_path}" to "{rename_file_path}".',
             )
 
         else:
-            self.logger_output("DEBUG", "Already exists.")
+            self._log.logger_output("DEBUG", "Already exists.")
             return False
 
     def file_duplicate_check(self, file_path, count=1):
@@ -274,7 +274,7 @@ class FileOperator(OsPathAlternative, Logger, SetTkinter):
             return check_ok_path
 
         else:
-            self.logger_output("DEBUG", f'Return check ok path is "{file_path}"')
+            self._log.logger_output("DEBUG", f'Return check ok path is "{file_path}"')
             return file_path
 
 

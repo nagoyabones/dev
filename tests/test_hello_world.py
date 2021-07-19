@@ -16,6 +16,9 @@ from unittest import mock
 
 
 class DummyOperator(DirectoryOperator, FileOperator):
+    def __init__(self):
+        self._log = mock.MagicMock()
+
     def logger_output(self, *args, **kwargs):
         return
 
@@ -155,9 +158,6 @@ class TestDirectoryOperator(UnittestFunctions, DirectoryOperator):
         self.assertRemoveTestFiles(self._target_path)
         self.assertRemoveTestFiles(self._result_path)
 
-    def logger_output(self, *args, **kwargs):
-        return
-
     def test_directory_select(self):
         def askdirectory(title, initialdir):
             return initialdir
@@ -262,9 +262,6 @@ class TestFileOperator(mock.MagicMock, FileOperator):
         self.assertRemoveTestFiles(self._test_path)
         self.assertRemoveTestFiles(self._target_path)
         self.assertRemoveTestFiles(self._result_path)
-
-    def logger_output(self, *args, **kwargs):
-        return
 
     def test_files_select(self):
         self.assertCreateTestFiles(self._test_path)
