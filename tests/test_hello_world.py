@@ -1,12 +1,17 @@
 import unittest
 import tkinter
 import os
+import logging
+import sys
+from io import StringIO
 
-from hello_world import DirectoryOperator
-from hello_world import OsPathAlternative
-from hello_world import FileOperator
-from hello_world import SetTkinter
-from hello_world import Logger
+from hello_world import (
+    DirectoryOperator,
+    OsPathAlternative,
+    FileOperator,
+    SetTkinter,
+    Logger,
+)
 from unittest import mock
 
 
@@ -46,7 +51,7 @@ class UnittestFunctions(unittest.TestCase, OsPathAlternative):
             self.assertNotExists(path)
 
 
-class TestOsPathAlternative(unittest.TestCase, DirectoryOperator):
+class TestOsPathAlternative(mock.MagicMock, DirectoryOperator):
     def test__is_exists(self):
         test_path = self._join_path(self._current_directory, "test")
         self.directory_create(self._current_directory, "test")
@@ -87,11 +92,29 @@ class TestOsPathAlternative(unittest.TestCase, DirectoryOperator):
 
 
 class TestLogger(UnittestFunctions, Logger):
+    def test__init(self):
+        self.assertFalse(hasattr(self, "_logger"))
+        self.assertFalse(hasattr(self, "_lev"))
+        self._init()
+        self.assertIsInstance(self._logger, logging.Logger)
+        self.assertEqual(
+            {
+                "ERROR": logging.ERROR,
+                "WARNING": logging.WARNING,
+                "INFO": logging.INFO,
+                "DEBUG": logging.DEBUG,
+            },
+            self._lev,
+        )
+
     def test_logger_output(self):
+        sys.stdout = StringIO()
+        self._init()
         self.logger_output("DEBUG", "Logger test.")
+        self.assertTrue("[DEBUG] Logger test." in sys.stdout.getvalue())
 
 
-class TestSetTkinter(UnittestFunctions, SetTkinter):
+class TestSetTkinter(mock.MagicMock, SetTkinter):
     def setUp(self):
         self.tkinter = mock.MagicMock()
 
@@ -108,7 +131,7 @@ class TestSetTkinter(UnittestFunctions, SetTkinter):
         self._set_tkinter()
 
 
-class TestDirectoryOperator(UnittestFunctions, DirectoryOperator):
+class TestDirectoryOperator(mock.MagicMock, DirectoryOperator):
     def setUp(self):
         self.tkinter = mock.MagicMock()
 
@@ -213,7 +236,7 @@ class TestDirectoryOperator(UnittestFunctions, DirectoryOperator):
         self.assertEqual(test_path, test_check_ok_path)
 
 
-class TestFileOperator(UnittestFunctions, FileOperator):
+class TestFileOperator(mock.MagicMock, FileOperator):
     def setUp(self):
         self.tkinter = mock.MagicMock()
 

@@ -29,26 +29,30 @@ class OsPathAlternative:
 
 
 class Logger:
-    def logger_output(self, level, text):
+    def __init__(self):
+        self._init()
 
-        logger = logging.getLogger(__name__)
+    def _init(self):
+        self._logger = logging.getLogger(__name__)
         sh = logging.StreamHandler(sys.stdout)
         fmt = logging.Formatter(
-            "%(asctime)s:[%(levelname)s] %(message)s", datefmt="%b %d %H:%M:%S",
+            "%(asctime)s:[%(levelname)s] %(message)s",
+            datefmt="%b %d %H:%M:%S",
         )
         sh.setFormatter(fmt)
 
-        lev = {
+        self._lev = {
             "ERROR": logging.ERROR,
             "WARNING": logging.WARNING,
             "INFO": logging.INFO,
             "DEBUG": logging.DEBUG,
-        }.get(level)
+        }
 
-        logger.setLevel(lev)
-        logger.addHandler(sh)
+        self._logger.addHandler(sh)
 
-        logger.log(lev, text)
+    def logger_output(self, level, text):
+        self._logger.setLevel((level_ := self._lev.get(level)))
+        self._logger.log(level_, text)
 
 
 class SetTkinter:
@@ -88,7 +92,8 @@ class DirectoryOperator(OsPathAlternative, Logger, SetTkinter):
                 self.logger_output("INFO", f'Removed directory "{target_path}".')
             else:
                 self.logger_output(
-                    "DEBUG", 'Do not removed directory. "fail_safe" is False.',
+                    "DEBUG",
+                    'Do not removed directory. "fail_safe" is False.',
                 )
                 return False
 
@@ -139,7 +144,8 @@ class DirectoryOperator(OsPathAlternative, Logger, SetTkinter):
         if self._is_not_exists(rename_dir_path):
             os.rename(base_dir_path, rename_dir_path)
             self.logger_output(
-                "INFO", f'Renamed "{base_dir_path}" to "{rename_dir_path}".',
+                "INFO",
+                f'Renamed "{base_dir_path}" to "{rename_dir_path}".',
             )
 
         else:
@@ -204,7 +210,8 @@ class FileOperator(OsPathAlternative, Logger, SetTkinter):
             if self._is_not_exists(to_new_file_path):
                 shutil.move(move_file_path, to_new_file_path)
                 self.logger_output(
-                    "INFO", f'Moved file "{move_file_path}" to "{to_new_file_path}".',
+                    "INFO",
+                    f'Moved file "{move_file_path}" to "{to_new_file_path}".',
                 )
 
             else:
@@ -224,7 +231,8 @@ class FileOperator(OsPathAlternative, Logger, SetTkinter):
             if self._is_not_exists(to_new_file_path):
                 shutil.copy(copy_file_path, to_new_file_path)
                 self.logger_output(
-                    "INFO", f'Copied file "{copy_file_path}" to "{to_new_file_path}".',
+                    "INFO",
+                    f'Copied file "{copy_file_path}" to "{to_new_file_path}".',
                 )
 
             else:
@@ -242,7 +250,8 @@ class FileOperator(OsPathAlternative, Logger, SetTkinter):
         if self._is_not_exists(rename_file_path):
             os.rename(base_file_path, rename_file_path)
             self.logger_output(
-                "INFO", f'Renamed "{base_file_path}" to "{rename_file_path}".',
+                "INFO",
+                f'Renamed "{base_file_path}" to "{rename_file_path}".',
             )
 
         else:
