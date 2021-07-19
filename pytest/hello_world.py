@@ -56,9 +56,11 @@ class Logger:
 
 
 class SetTkinter:
+    def __init__(self):
+        self._log = Logger()
+
     def _set_tkinter(self):
-        log_ = Logger()
-        log_.logger_output("DEBUG", 'in_"set_tkinter"')
+        self._log.logger_output("DEBUG", 'in_"set_tkinter"')
         if hasattr(self, "_window") is False:
             self._window = tkinter.Tk()
             self._window.withdraw()

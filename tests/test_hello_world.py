@@ -108,18 +108,20 @@ class TestLogger(UnittestFunctions, Logger):
         )
 
     def test_logger_output(self):
+        pre_stream = sys.stdout
         sys.stdout = StringIO()
         self._init()
         self.logger_output("DEBUG", "Logger test.")
         self.assertTrue("[DEBUG] Logger test." in sys.stdout.getvalue())
+        sys.stdout = pre_stream
 
 
-class TestSetTkinter(mock.MagicMock, SetTkinter):
-    def setUp(self):
-        self.tkinter = mock.MagicMock()
+class TestSetTkinter(UnittestFunctions, SetTkinter):
+    @classmethod
+    def setUpClass(cls):
+        cls._log = mock.MagicMock()
 
     def test__set_tkinter(self):
-        del self.tkinter
         self.assertFalse(hasattr(self, "_window"))
         self.assertFalse(hasattr(self, "tkinter"))
         self._set_tkinter()
@@ -131,9 +133,11 @@ class TestSetTkinter(mock.MagicMock, SetTkinter):
         self._set_tkinter()
 
 
-class TestDirectoryOperator(mock.MagicMock, DirectoryOperator):
+class TestDirectoryOperator(UnittestFunctions, DirectoryOperator):
     def setUp(self):
+        self._init()
         self.tkinter = mock.MagicMock()
+        self._log = mock.MagicMock()
 
     def test_directory_select(self):
         def askdirectory(title, initialdir):
