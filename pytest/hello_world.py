@@ -68,7 +68,7 @@ class SetTkinter:
             self.tkinter = tkinter
 
 
-class DirectoryOperator(OsPathAlternative, Logger, SetTkinter):
+class DirectoryOperator(OsPathAlternative, SetTkinter):
     def directory_select(self, title):
         self._set_tkinter()
         select_path = self.tkinter.filedialog.askdirectory(
@@ -172,7 +172,7 @@ class DirectoryOperator(OsPathAlternative, Logger, SetTkinter):
             return dir_path
 
 
-class FileOperator(OsPathAlternative, Logger, SetTkinter):
+class FileOperator(OsPathAlternative, SetTkinter):
     def files_select(self, title):
         self._set_tkinter()
         file_type = [("テキストファイル", "*.txt")]

@@ -141,7 +141,6 @@ class TestSetTkinter(UnittestFunctions, SetTkinter):
 
 class TestDirectoryOperator(UnittestFunctions, DirectoryOperator):
     def setUp(self):
-        self._init()
         self.tkinter = mock.MagicMock()
         self._log = mock.MagicMock()
 
@@ -244,9 +243,8 @@ class TestDirectoryOperator(UnittestFunctions, DirectoryOperator):
         )
 
 
-class TestFileOperator(mock.MagicMock, FileOperator):
+class TestFileOperator(UnittestFunctions, FileOperator):
     def setUp(self):
-        self._init()
         self.tkinter = mock.MagicMock()
         self._log = mock.MagicMock()
 
@@ -255,12 +253,12 @@ class TestFileOperator(mock.MagicMock, FileOperator):
         self._result_path = self._join_path(self._to_path, "test_text.txt")
 
         self.assertRemoveTestFiles(self._test_path)
-        self.assertRemoveTestFiles(self._target_path)
+        self.assertRemoveTestFiles(self._to_path)
         self.assertRemoveTestFiles(self._result_path)
 
     def tearDown(self):
         self.assertRemoveTestFiles(self._test_path)
-        self.assertRemoveTestFiles(self._target_path)
+        self.assertRemoveTestFiles(self._to_path)
         self.assertRemoveTestFiles(self._result_path)
 
     def test_files_select(self):
@@ -334,7 +332,7 @@ class TestFileOperator(mock.MagicMock, FileOperator):
         self.assertRemoveTestFiles(rename_path)
 
     def test_file_duplicate_check(self):
-        test_check_path = self._join_path(self._current_directory, "test(1).txt")
+        test_check_path = self._join_path(self._current_directory, "test_text(1).txt")
         self.assertRemoveTestFiles(test_check_path)
         self.assertCreateTestFiles(self._test_path)
 
