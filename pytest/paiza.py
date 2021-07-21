@@ -1,55 +1,39 @@
-n, m, k = list(map(int, input().split(" ")))
-sugoroku_map = [[0, 0]]
-players = [[0 for x in range(2)] for y in range(m)]
-arrival_rank = []
+from pprint import pprint
+import numpy as np
 
-for _ in range(n - 2):
-    move, coin = list(map(int, input().split(" ")))
-    sugoroku_map.append([move, coin])
-sugoroku_map.append([0, 0])
+x, y, z = list(map(int, input().split(" ")))
+object_ = np.array([])
+x_axis = []
 
-for i in range(k):
+for _ in range(z * 2):
+    step = []
+    x_axis_row = np.zeros(y)
+    sep = False
 
-    move = list(map(int, input().split(" ")))
+    for __ in range(x):
+        line = input().replace("#", "1").replace(".", "0")
 
-    for i in range(m):
-        if (i in arrival_rank) is False:
+        if line == "--":
+            sep = True
+            break
+        line = list(map(int, line))
+        step.append(line)
 
-            p_position = players[i][0]
-            p_coin = players[i][1]
+    if sep is False:
+        step_np = np.array(step)
+        for data in step_np:
+            x_axis_row = x_axis_row + data
 
-            p_position = min(n - 1, max(0, p_position + move[i]))
+        x_axis_row = list(map(int, x_axis_row.tolist()))
 
-            if p_position < n - 1:
-                players[i][0] = p_position
-                map_data = sugoroku_map[p_position]
-                command_move = map_data[0]
-                get_coin = map_data[1]
+        for i in range(len(x_axis_row)):
+            if x_axis_row[i] > 0:
+                x_axis_row[i] = "#"
+            elif x_axis_row[i] == 0:
+                x_axis_row[i] = "."
 
-                players[i][1] = max(0, p_coin + get_coin)
+        x_axis = [x_axis_row] + x_axis
 
-                p_position = min(n - 1, max(0, p_position + command_move))
-                players[i][0] = p_position
+for data in x_axis:
+    print("".join(data))
 
-                if p_position >= n - 1:
-                    arrival_rank.append(i)
-
-            elif p_position >= n - 1:
-                arrival_rank.append(i)
-
-        else:
-            if arrival_rank.index(i) == 0:
-                players[i][1] = players[i][1] + move[i] * 3
-            elif arrival_rank == 1:
-                players[i][1] = players[i][1] + move[i] * 2
-            elif arrival_rank == 2:
-                players[i][1] = players[i][1] + move[i] * 1
-
-rank = []
-for data in players:
-    rank.append(data[1])
-
-max_coin = max(rank)
-player = rank.index(max_coin) + 1
-
-print(player, max_coin)
