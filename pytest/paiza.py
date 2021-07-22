@@ -1,39 +1,49 @@
-from pprint import pprint
-import numpy as np
+seven_segment = [
+    [1, 1, 1, 1, 1, 1, 0],
+    [0, 1, 1, 0, 0, 0, 0],
+    [1, 1, 0, 1, 1, 0, 1],
+    [1, 1, 1, 1, 0, 0, 1],
+    [0, 1, 1, 0, 0, 1, 1],
+    [1, 0, 1, 1, 0, 1, 1],
+    [1, 0, 1, 1, 1, 1, 1],
+    [1, 1, 1, 0, 0, 1, 0],
+    [1, 1, 1, 1, 1, 1, 1],
+    [1, 1, 1, 1, 0, 1, 1],
+]
 
-x, y, z = list(map(int, input().split(" ")))
-object_ = np.array([])
-x_axis = []
 
-for _ in range(z * 2):
-    step = []
-    x_axis_row = np.zeros(y)
-    sep = False
+def symmetrical_movement(state):
+    result = [state[0], state[5], state[4], state[3], state[2], state[1], state[6]]
+    return result
 
-    for __ in range(x):
-        line = input().replace("#", "1").replace(".", "0")
 
-        if line == "--":
-            sep = True
-            break
-        line = list(map(int, line))
-        step.append(line)
+def rotational_transfer(state):
+    result = [state[3], state[4], state[5], state[0], state[1], state[2], state[6]]
+    return result
 
-    if sep is False:
-        step_np = np.array(step)
-        for data in step_np:
-            x_axis_row = x_axis_row + data
 
-        x_axis_row = list(map(int, x_axis_row.tolist()))
+a = list(map(int, input().split(" ")))
+b = list(map(int, input().split(" ")))
+if a in seven_segment and b in seven_segment:
+    print("Yes")
+else:
+    print("No")
 
-        for i in range(len(x_axis_row)):
-            if x_axis_row[i] > 0:
-                x_axis_row[i] = "#"
-            elif x_axis_row[i] == 0:
-                x_axis_row[i] = "."
+a_t = symmetrical_movement(a)
+b_t = symmetrical_movement(b)
+print(a_t)
+print(b_t)
+if a_t in seven_segment and b_t in seven_segment:
+    print("Yes")
+else:
+    print("No")
 
-        x_axis = [x_axis_row] + x_axis
 
-for data in x_axis:
-    print("".join(data))
-
+a_r = rotational_transfer(a)
+b_r = rotational_transfer(b)
+print(a_r)
+print(b_r)
+if a_r in seven_segment and b_r in seven_segment:
+    print("Yes")
+else:
+    print("No")
