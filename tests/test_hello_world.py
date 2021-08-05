@@ -14,6 +14,8 @@ from hello_world import (
 )
 from unittest import mock
 
+print(sys.path)
+
 
 class DummyOperator(DirectoryOperator, FileOperator):
     def __init__(self):
@@ -210,16 +212,12 @@ class TestDirectoryOperator(UnittestFunctions, DirectoryOperator):
         rename = "test_2"
         rename_path = self._join_path(self._current_directory, f"{rename}")
         self.assertRemoveTestFiles(rename_path)
-        self.assertCreateTestFiles(
-            self._test_path,
-        )
+        self.assertCreateTestFiles(self._test_path,)
 
         self.assertNotExists(rename_path)
 
         self.directory_rename(self._test_path, rename)
-        self.assertNotExists(
-            self._test_path,
-        )
+        self.assertNotExists(self._test_path,)
         self.assertExists(rename_path)
 
         self.directory_create(self._current_directory, "test")
